@@ -1,3 +1,8 @@
+FIMTrack needs 
+
+- Qt (GUI)
+- OpenCV (Computer Vision Library)
+
 FIMTrack is a larval tracking program to acquire locomotion trajectories 
 and conformation information of Drosophila melanogaster larvae. It is 
 optimized for FIM images. FIM is an acronym for FTIR-based Imaging Method, 
