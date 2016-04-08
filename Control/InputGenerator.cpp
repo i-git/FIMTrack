@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -33,118 +33,119 @@
 
 #include "InputGenerator.hpp"
 
-void InputGenerator::readMatrices(const std::string &path, 
-                                  cv::Mat &cameraMatrix, 
-                                  cv::Mat &distCoeffs, 
-                                  cv::Size &imageSize)
+void InputGenerator::readMatrices(const std::string& path,
+                                  cv::Mat& cameraMatrix,
+                                  cv::Mat& distCoeffs,
+                                  cv::Size& imageSize)
 {
-    cv::FileStorage fs = cv::FileStorage(path, cv::FileStorage::READ, "UTF-8");
-    if(fs.isOpened())
+    cv::FileStorage fs = cv::FileStorage(path, cv::FileStorage::READ, StringConstats::textFileCoding);
+    if (fs.isOpened())
     {
-        fs["cameraMatrix"] >> cameraMatrix;
-        fs["distCoeffs"] >> distCoeffs;
-        fs["ImageHeight"] >> imageSize.height;
-        fs["ImageWidth"] >> imageSize.width;
+        fs["cameraMatrix"]  >> cameraMatrix;
+        fs["distCoeffs"]    >> distCoeffs;
+        fs["ImageHeight"]   >> imageSize.height;
+        fs["ImageWidth"]    >> imageSize.width;
         fs.release();
     }
 }
 
-void InputGenerator::readOutputLarvae(const std::string &path, std::vector<Larva> &dstLarvae, std::vector<std::string> &imgPaths, bool &useUndist)
+void InputGenerator::readOutputLarvae(const std::string& path, std::vector<Larva>& dstLarvae, std::vector<std::string>& imgPaths, bool& useUndist)
 {
-    cv::FileStorage fs = cv::FileStorage(path, cv::FileStorage::READ, "UTF-8");
-    
-    if(fs.isOpened())
+    cv::FileStorage fs = cv::FileStorage(path, cv::FileStorage::READ, StringConstats::textFileCoding);
+
+    if (fs.isOpened())
     {
         int undist;
         fs["useUndist"] >> undist;
         useUndist = (undist == 0) ? false : true;
-        
+
         fs["imgNames"] >> imgPaths;
-        
-        
+
+
         cv::FileNode node = fs["data"];
-        
-        for (cv::FileNodeIterator it = node.begin(); it != node.end(); ++it)
+
+        for (auto const& n : node)
         {
             Larva l;
-            (*it) >> l;
+            n >> l;
             dstLarvae.push_back(l);
         }
     }
     fs.release();
 }
 
-void InputGenerator::readRegionOfInterests(const std::string &path, RegionOfInterestContainer *ROIContainert)
+void InputGenerator::readRegionOfInterests(const std::string& path, RegionOfInterestContainer* ROIContainert)
 {
-    cv::FileStorage fs = cv::FileStorage(path,cv::FileStorage::READ, "UTF-8");
-    
-    if(fs.isOpened())
-    {        
+    cv::FileStorage fs = cv::FileStorage(path, cv::FileStorage::READ, StringConstats::textFileCoding);
+
+    if (fs.isOpened())
+    {
         fs["ROIContainer"] >> ROIContainert;
     }
-    
+
     fs.release();
 }
 
-void InputGenerator::readLandmarks(const std::string &path, LandmarkContainer *landmarkContainer)
+void InputGenerator::readLandmarks(const std::string& path, LandmarkContainer* landmarkContainer)
 {
-    cv::FileStorage fs = cv::FileStorage(path,cv::FileStorage::READ, "UTF-8");
-    
-    if(fs.isOpened())
-    {        
+    cv::FileStorage fs = cv::FileStorage(path, cv::FileStorage::READ, StringConstats::textFileCoding);
+
+    if (fs.isOpened())
+    {
         fs["LandmarkContainer"] >> landmarkContainer;
     }
-    
+
     fs.release();
 }
 
-void InputGenerator::loadConfiguration(const std::string &path)
+void InputGenerator::loadConfiguration(const std::string& path)
 {
-    cv::FileStorage in = cv::FileStorage(path, cv::FileStorage::READ, "UTF-8");
-    if(in.isOpened())
+    cv::FileStorage in = cv::FileStorage(path, cv::FileStorage::READ, StringConstats::textFileCoding);
+    if (in.isOpened())
     {
         std::string temp;
-        
+
         /* Read GeneralParameters */
-        in["bEnableDetailetOutput"] >> GeneralParameters::bEnableDetailetOutput;
-        in["bSaveLog"] >> GeneralParameters::bSaveLog;
-        in["bShowTrackingProgress"] >> GeneralParameters::bShowTrackingProgress;
-        in["iGrayThreshold"] >> GeneralParameters::iGrayThreshold;
-        in["iMaxLarvaeArea"] >> GeneralParameters::iMaxLarvaeArea;
-        in["iMinLarvaeArea"] >> GeneralParameters::iMinLarvaeArea;
-        
+        in["bEnableDetailetOutput"]     >> GeneralParameters::bEnableDetailetOutput;
+        in["bSaveLog"]                  >> GeneralParameters::bSaveLog;
+        in["bShowTrackingProgress"]     >> GeneralParameters::bShowTrackingProgress;
+        in["iGrayThreshold"]            >> GeneralParameters::iGrayThreshold;
+        in["iMaxLarvaeArea"]            >> GeneralParameters::iMaxLarvaeArea;
+        in["iMinLarvaeArea"]            >> GeneralParameters::iMinLarvaeArea;
+
         /* Read CameraParameter */
-        in["dFSP"] >> CameraParameter::dFPS;
-        in["dScaleFactor"] >> CameraParameter::dScaleFactor;
-        in["File"] >> temp;
+        in["dFSP"]          >> CameraParameter::dFPS;
+        in["dScaleFactor"]  >> CameraParameter::dScaleFactor;
+        in["File"]          >> temp;
         CameraParameter::File = QtOpencvCore::str2qstr(temp);
-        
+
         /* Read BackgroundSubstraction Parameters */
         in["BackgroundSubstractionbUseDefault"] >> BackgroundSubstraction::bUseDefault;
-        in["iFromImage"] >> BackgroundSubstraction::iFromImage;
-        in["iOffset"] >> BackgroundSubstraction::iOffset;
-        in["iToImage"] >> BackgroundSubstraction::iToImage;
-        
+        in["iFromImage"]                        >> BackgroundSubstraction::iFromImage;
+        in["iOffset"]                           >> BackgroundSubstraction::iOffset;
+        in["iToImage"]                          >> BackgroundSubstraction::iToImage;
+
         /* Read LarvaeExtractionParameters */
         in["LarvaeExtractionParametersbUseDefault"] >> LarvaeExtractionParameters::bUseDefault;
-        in["iNumerOfSpinePoints"] >> LarvaeExtractionParameters::iNumerOfSpinePoints;
-        
+        in["iNumerOfSpinePoints"]                   >> LarvaeExtractionParameters::iNumerOfSpinePoints;
+
         /* Read IPANContourCurvatureParameters */
-        in["bUseDynamicIpanParameterCalculation"] >> LarvaeExtractionParameters::IPANContourCurvatureParameters::bUseDynamicIpanParameterCalculation;
-        in["dMaximalCurvaturePointsDistance"] >> LarvaeExtractionParameters::IPANContourCurvatureParameters::dMaximalCurvaturePointsDistance;
-        in["iCurvatureWindowSize"] >> LarvaeExtractionParameters::IPANContourCurvatureParameters::iCurvatureWindowSize;
-        in["iMaximalTriangelSideLenght"] >> LarvaeExtractionParameters::IPANContourCurvatureParameters::iMaximalTriangelSideLenght;
-        in["iMinimalTriangelSideLenght"] >> LarvaeExtractionParameters::IPANContourCurvatureParameters::iMinimalTriangelSideLenght;
-        
+        in["bUseDynamicIpanParameterCalculation"]   >> LarvaeExtractionParameters::IPANContourCurvatureParameters::bUseDynamicIpanParameterCalculation;
+        in["dMaximalCurvaturePointsDistance"]       >> LarvaeExtractionParameters::IPANContourCurvatureParameters::dMaximalCurvaturePointsDistance;
+        in["iCurvatureWindowSize"]                  >> LarvaeExtractionParameters::IPANContourCurvatureParameters::iCurvatureWindowSize;
+        in["iMaximalTriangelSideLenght"]            >> LarvaeExtractionParameters::IPANContourCurvatureParameters::iMaximalTriangelSideLenght;
+        in["iMinimalTriangelSideLenght"]            >> LarvaeExtractionParameters::IPANContourCurvatureParameters::iMinimalTriangelSideLenght;
+
         /* Read CoiledRecognitionParameters */
-        in["dMidcirclePerimeterToPerimeterThreshold"] >> LarvaeExtractionParameters::CoiledRecognitionParameters::dMidcirclePerimeterToPerimeterThreshold;
-        in["dPerimeterToSpinelenghtThreshold"] >> LarvaeExtractionParameters::CoiledRecognitionParameters::dPerimeterToSpinelenghtThreshold;
-        
+        in["dMidcirclePerimeterToPerimeterThreshold"]   >> LarvaeExtractionParameters::CoiledRecognitionParameters::dMidcirclePerimeterToPerimeterThreshold;
+        in["dPerimeterToSpinelenghtThreshold"]          >> LarvaeExtractionParameters::CoiledRecognitionParameters::dPerimeterToSpinelenghtThreshold;
+        in["dMaxToMeanRadiusThreshold"]                 >> LarvaeExtractionParameters::CoiledRecognitionParameters::dMaxToMeanRadiusThreshold;
+
         /* Read StopAndGoCalculation Parameter */
-        in["bUseDynamicStopAndGoParameterCalculation"] >> LarvaeExtractionParameters::StopAndGoCalculation::bUseDynamicStopAndGoParameterCalculation;
-        in["iAngleThreshold"] >> LarvaeExtractionParameters::StopAndGoCalculation::iAngleThreshold;
-        in["iFramesForSpeedCalculation"] >> LarvaeExtractionParameters::StopAndGoCalculation::iFramesForSpeedCalculation;
-        in["iSpeedThreshold"] >> LarvaeExtractionParameters::StopAndGoCalculation::iSpeedThreshold;
+        in["bUseDynamicStopAndGoParameterCalculation"]  >> LarvaeExtractionParameters::StopAndGoCalculation::bUseDynamicStopAndGoParameterCalculation;
+        in["iAngleThreshold"]                           >> LarvaeExtractionParameters::StopAndGoCalculation::iAngleThreshold;
+        in["iFramesForSpeedCalculation"]                >> LarvaeExtractionParameters::StopAndGoCalculation::iFramesForSpeedCalculation;
+        in["iSpeedThreshold"]                           >> LarvaeExtractionParameters::StopAndGoCalculation::iSpeedThreshold;
     }
     in.release();
 }

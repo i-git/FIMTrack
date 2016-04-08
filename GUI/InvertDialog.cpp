@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -33,10 +33,7 @@
 
 #include "InvertDialog.hpp"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include "ui_InvertDialog.h"
-#pragma clang diagnostic pop
 
 InvertDialog::InvertDialog(QWidget *parent) :
     QDialog(parent),
@@ -56,15 +53,23 @@ InvertDialog::~InvertDialog()
 
 void InvertDialog::setBeforeTimeSteps(QStringList const& timeSteps)
 {
+    bool oldState = this->ui->cbBefore->blockSignals(true);
     this->ui->cbBefore->clear();
     this->ui->cbBefore->addItems(timeSteps);
+    this->ui->cbBefore->blockSignals(oldState);
+    
+    this->ui->cbBefore->blockSignals(oldState);
+    
     this->ui->rbBefore->setEnabled(!timeSteps.isEmpty());
 }
 
 void InvertDialog::setAfterTimeSteps(QStringList const& timeSteps)
 {
+    bool oldState = this->ui->cbAfter->blockSignals(true);
     this->ui->cbAfter->clear();
     this->ui->cbAfter->addItems(timeSteps);
+    this->ui->cbAfter->blockSignals(oldState);
+    
     this->ui->rbAfter->setEnabled(!timeSteps.isEmpty());
 }
 

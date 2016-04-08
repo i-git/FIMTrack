@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,8 +34,6 @@
 #ifndef MAINGUI_HPP
 #define MAINGUI_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QMainWindow>
 #include <QFileDialog>
 #include <QStandardItemModel>
@@ -44,7 +42,6 @@
 #include <QFileInfo>
 #include <QtCore>
 #include <QtGui>
-#pragma clang diagnostic pop
 
 #include "GUI/PreferencesDialogWindow.hpp"
 #include "GUI/LOGWindow.hpp"
@@ -76,7 +73,8 @@ public:
     ~MainGUI();
 
 signals:
-    void startTrackingSignal(std::vector<std::vector<std::string> > const &, bool, Undistorter const &, RegionOfInterestContainer const*);
+    void startTrackingSignal(std::vector<std::vector<std::string> > const &, bool, Undistorter const &, RegionOfInterestContainer const* = nullptr);
+    void stopTrackingSignal();
     void logMessage(QString, LOGLEVEL);
     void loadCameraParameter(QString);
     void updatePreferenceParameter();
@@ -96,37 +94,34 @@ private slots:
     void on_actionOpen_triggered();
     void on_actionNew_triggered();
     void on_actionResults_Viewer_triggered();
-    void on_treeView_itemClicked(QTreeWidgetItem *item, int column);
     void on_btnDelete_clicked();
+    void on_treeView_itemSelectionChanged();
     
     void previewTrackingImageSlot(cv::Mat img);
     void trackingDoneSlot();
     void initUndistorer(QString const& file);
     void updateTreeViewer();
     void resetListViewe();
-    void showMessage(QString msg); 
-    
-    void updateCurrentJobID();
-    
+    void showMessage(QString msg);
+
 private:
-    Ui::MainGUI                 *ui;
-    PreferencesDialogWindow     *mPreferencesDialogWindow;
-    LOGWindow                   *mLogWindow;
-    ResultsViewer               *mResultsViewer;
-    TrackerScene                *mScene;
+    Ui::MainGUI*                ui;
+    PreferencesDialogWindow*    _preferencesDialogWindow;
+    LOGWindow*                  _logWindow;
+    ResultsViewer*              _resultsViewer;
+    TrackerScene*               _scene;
 
-    QThread                     *mTrackingThread;
+    QThread*                    _trackingThread;
     
-    QStringList                 mFileNames;
-    QList<QStringList>          mJobs;
+    QStringList                 _fileNames;
+    QList<QStringList>          _jobs;
     
-    Undistorter                 mUndistorter;
+    Undistorter                 _undistorter;
 
-    Tracker                     mTracker;
-    cv::Mat                     mTrackingPreviewImg;
-    QMutex                      *mMutex;
+    Tracker                     _tracker;
+    cv::Mat                     _trackingPreviewImg;
     
-    QString                     mConfigurationFile;
+    QString                     _configurationFile;
     
     void showImage(QString path);
     void readParameters();

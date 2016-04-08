@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -37,14 +37,10 @@
 #define _USE_MATH_DEFINES
 
 #include <opencv2/opencv.hpp>
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QDebug>
-#pragma clang diagnostic pop
 
 #include "Control/QtOpencvCore.hpp"
 #include "Configuration/TrackerConfig.hpp"
 #include "Control/Calc.hpp"
-//#include "Operators.hpp"
 
 #endif // FIMTRACK_HPP

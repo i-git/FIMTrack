@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -53,11 +53,11 @@
 class InputGenerator
 {
 public:
-    static void readMatrices(std::string const& path, 
-                             cv::Mat &cameraMatrix, 
-                             cv::Mat &distCoeffs, 
-                             cv::Size &imageSize);
-    
+    static void readMatrices(std::string const& path,
+                             cv::Mat& cameraMatrix,
+                             cv::Mat& distCoeffs,
+                             cv::Size& imageSize);
+
     static void loadConfiguration(std::string const& path);
 
     /**
@@ -67,11 +67,11 @@ public:
      * @param imgPaths contains the paths to the images
      * @param useUndist is a flag to indicate if undistortion (for lens distortion using a camera matrix) is used
      */
-    static void readOutputLarvae(std::string const& path, std::vector<Larva> & dstLarvae, std::vector<std::string> &imgPaths, bool &useUndist);
-    
-    static void readRegionOfInterests(const std::string &path, RegionOfInterestContainer *ROIContainert);
-    
-    static void readLandmarks(const std::string &path, LandmarkContainer *landmarkContainer);
+    static void readOutputLarvae(std::string const& path, std::vector<Larva>& dstLarvae, std::vector<std::string>& imgPaths, bool& useUndist);
+
+    static void readRegionOfInterests(const std::string& path, RegionOfInterestContainer* ROIContainert);
+
+    static void readLandmarks(const std::string& path, LandmarkContainer* landmarkContainer);
 
 private:
 

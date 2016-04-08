@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -32,11 +32,7 @@
  *****************************************************************************/
 
 #include "UniteDialog.hpp"
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include "ui_UniteDialog.h"
-#pragma clang diagnostic pop
 
 UniteDialog::UniteDialog(QWidget *parent) :
     QDialog(parent),
@@ -53,8 +49,10 @@ UniteDialog::~UniteDialog()
 void UniteDialog::setup(QString const& larvaID, QStringList const& contemplableLarvaeIDs)
 {
     this->ui->label->setText(QString("Attach to %1").arg(larvaID));
+    bool oldState = this->ui->comboBox->blockSignals(true);
     this->ui->comboBox->clear();
     this->ui->comboBox->addItems(contemplableLarvaeIDs);
+    this->ui->comboBox->blockSignals(oldState);
 }
 
 void UniteDialog::on_pushButton_clicked()

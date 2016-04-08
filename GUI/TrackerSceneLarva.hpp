@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,16 +34,14 @@
 #ifndef TRACKERSCENELARVA_HPP
 #define TRACKERSCENELARVA_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QtCore>
 #include <QtGui>
-#pragma clang diagnostic pop
 
 #include <cmath>
 
 #include "Data/Larva.hpp"
 #include "TrackerSceneLarvaCircle.hpp"
+#include "TrackerScene.hpp"
 #include "Arrow.hpp"
 
 class TrackerSceneLarva: public QObject
@@ -76,7 +74,6 @@ public slots:
     void setPathVisible (bool visible);
     void setDistance2OriginVisible (bool visible);
     
-//    Larva* getBaseLarva () const;
     void setLarvaPointer(Larva* larva) {this->mLarva = larva;}
     
     QGraphicsScene* getScene() const {return this->mScene;}
@@ -136,7 +133,7 @@ private slots:
     void initLarvaDrawing();
     void updateLarvaDrawing(unsigned int time);
     void adjustCircles();
-    void adjustLarvaContourAndSpine(spineType const& spine, std::vector<double> const& radii);
+    void adjustLarvaContourAndSpine(FIMTypes::spine_t const& spine, std::vector<double> const& radii);
     void adjustSilhouette();
     void restoreVisibility();
     

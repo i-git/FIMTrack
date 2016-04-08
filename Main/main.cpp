@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -33,30 +33,6 @@
 
 #include "GUI/MainGUI.hpp"
 #include <QApplication>
-
-//bool QApplication::notify(QObject* receiver, QEvent* event)
-//{
-//    try 
-//    {
-//        return QApplication::notify(receiver, event);
-//    } 
-//    catch (std::exception &e) 
-//    {
-//        qFatal("Error %s sending event %s to object %s (%s)", 
-//               e.what(), typeid(*event).name(), qPrintable(receiver->objectName()),
-//               typeid(*receiver).name());
-//    } 
-//    catch (...) 
-//    {
-//        qFatal("Error <unknown> sending event %s to object %s (%s)", 
-//               typeid(*event).name(), qPrintable(receiver->objectName()),
-//               typeid(*receiver).name());
-//    }        
-    
-//    // qFatal aborts, so this isn't really necessary
-//    // but you might continue if you use a different logging lib
-//    return false;
-//}
 
 int main(int argc, char *argv[])
 {    

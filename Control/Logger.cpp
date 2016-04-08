@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -33,40 +33,40 @@
 
 #include "Logger.hpp"
 
-Logger* Logger::instance = NULL;
-QList<QString> Logger::logList = QList<QString>();
+Logger* Logger::_instance = nullptr;
+QList<QString> Logger::_logList = QList<QString>();
 
-Logger::Logger(QObject *parent) :
+Logger::Logger(QObject* parent) :
     QObject(parent)
 {
 }
 
-Logger *Logger::getInstance()
+Logger* Logger::getInstance()
 {
     static Guard g;
-    if(instance == NULL)
+    if (_instance == nullptr)
     {
-        instance = new Logger();
+        _instance = new Logger();
     }
-    return instance;
+    return _instance;
 }
 
 void Logger::saveLog()
 {
     QFile outfile;
     QString fileName = "";
-    
+
     fileName.append("log_");
     fileName.append(QDateTime::currentDateTime().toString(Qt::ISODate).replace(":", "-"));
     fileName.append(".txt");
-    
+
     outfile.setFileName(fileName);
     outfile.open(QIODevice::Append | QIODevice::Text);
-    
+
     QTextStream out(&outfile);
-    for(int i = 0; i < Logger::logList.size(); i++)
+    for (int i = 0; i < Logger::_logList.size(); i++)
     {
-         out << Logger::logList.at(i) << endl;   
+        out << Logger::_logList.at(i) << endl;
     }
 }
 
@@ -74,18 +74,18 @@ void Logger::saveLog(QString dir)
 {
     QFile outfile;
     QString fileName = dir;
-    
+
     fileName.append("/log_");
     fileName.append(QDateTime::currentDateTime().toString(Qt::ISODate).replace(":", "-"));
     fileName.append(".txt");
-    
+
     outfile.setFileName(fileName);
     outfile.open(QIODevice::Append | QIODevice::Text);
-    
+
     QTextStream out(&outfile);
-    for(int i = 0; i < Logger::logList.size(); i++)
+    for (int i = 0; i < Logger::_logList.size(); i++)
     {
-         out << Logger::logList.at(i) << endl;   
+        out << Logger::_logList.at(i) << endl;
     }
 }
 
@@ -98,32 +98,32 @@ void Logger::addLogMessage(QString msg, LOGLEVEL level)
 void Logger::handleLogMessage(QString msg, LOGLEVEL level)
 {
     QString res = "";
-    
-    switch(level)
+
+    switch (level)
     {
-    case INFO:
-        res.append(" INFO \t");
-        emit newMessageForMainGUI(msg);
-        break;
-    case DEBUG:
-        res.append(" DEBUG \t");
-        break;
-    case WARNING:
-        res.append(" WARNING \t");
-        break;
-    case ERROR:
-        res.append(" ERROR \t");
-        break;
-    case FATAL:
-        res.append(" FATAL \t");
-        break;
+        case INFO:
+            res.append(" INFO\t");
+            emit newMessageForMainGUI(msg);
+            break;
+        case DEBUG:
+            res.append(" DEBUG\t");
+            break;
+        case WARNING:
+            res.append(" WARNING\t");
+            break;
+        case MERROR:
+            res.append(" ERROR\t");
+            break;
+        case FATAL:
+            res.append(" FATAL\t");
+            break;
     }
-    
+
     res.append(QDateTime::currentDateTime().toString(Qt::ISODate));
-    res.append("   ");
+    res.append("\t");
     res.append(msg);
-    
-    this->logList.append(res);
-    
+
+    this->_logList.append(res);
+
     emit newLogMessage(res);
 }

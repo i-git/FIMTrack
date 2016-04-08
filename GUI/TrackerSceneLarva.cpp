@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -68,7 +68,6 @@ TrackerSceneLarva::TrackerSceneLarva(QGraphicsScene *scene,
 
 TrackerSceneLarva::~TrackerSceneLarva()
 { 
-//    qDebug() << Q_FUNC_INFO << this->mID;
 }
 
 void TrackerSceneLarva::invert(uint time)
@@ -236,7 +235,7 @@ bool TrackerSceneLarva::checkForSpinePoints()
 void TrackerSceneLarva::initLarvaDrawing()
 {
     this->mCurrentTime = 0;
-    spineType spine;
+    FIMTypes::spine_t spine;
     std::vector<double> radii;
     std::vector<unsigned int> timeSteps = this->mLarva->getAllTimeSteps();
     
@@ -275,7 +274,7 @@ void TrackerSceneLarva::initLarvaDrawing()
 void TrackerSceneLarva::updateLarvaDrawing(unsigned int time)
 {    
     this->mCurrentTime = time;
-    spineType spine;
+    FIMTypes::spine_t spine;
     std::vector<double> radii;
     
     if(!this->mLarva->getSpineAt(time, spine) || !this->mLarva->getSpineRadiiAt(time, radii))
@@ -326,13 +325,13 @@ void TrackerSceneLarva::adjustCircles()
     emit sendTotalNumberOfSpinePoints(this->mCircles.size());
 }
 
-void TrackerSceneLarva::adjustLarvaContourAndSpine(spineType const& spine, 
+void TrackerSceneLarva::adjustLarvaContourAndSpine(FIMTypes::spine_t const& spine, 
                                                    std::vector<double> const& radii)
 {
     /* Iterators */
-    spineType::const_iterator                 spineIt         = spine.begin();
-    spineType::const_iterator                 spineItEnd		= spine.end();	
-    std::vector<double>::const_iterator       radiiIt         = radii.begin();
+    FIMTypes::spine_t::const_iterator                 spineIt         = spine.begin();
+    FIMTypes::spine_t::const_iterator                 spineItEnd		= spine.end();	
+    std::vector<double>::const_iterator                 radiiIt         = radii.begin();
     
     QPainterPath spinePath;    
     spinePath.moveTo(qreal(spineIt->x), qreal(spineIt->y));
@@ -379,7 +378,6 @@ void TrackerSceneLarva::adjustDistancePaths()
         if(this->mLarva->getMomentumAt(timeSteps.at(i), momentum))
         {
             travelPath.lineTo(qreal(momentum.x), qreal(momentum.y));
-            //            qDebug() << travelPath << QString("Index %1; Timestep %2; Momentum [%3, %4]").arg(i).arg(timeSteps.at(i)).arg(momentum.x).arg(momentum.y);
         }
     }
     
@@ -631,12 +629,12 @@ void TrackerSceneLarva::updateDrawing()
     {
         QLineF directionLine;
         
-        double xOffset  = 0;//(spinePath.elementAt(0).x - spinePath.elementAt(1/*spinePath.elementCount() / 2*/).x);
-        double yOffset  = 0;//(spinePath.elementAt(0).y - spinePath.elementAt(1/*spinePath.elementCount() / 2*/).y);
+        double xOffset  = 0;
+        double yOffset  = 0;
         
         directionLine.setP1(QPointF(
-                                spinePath.elementAt(1/*spinePath.elementCount() / 2*/).x + xOffset, 
-                                spinePath.elementAt(1/*spinePath.elementCount() / 2*/).y + yOffset));
+                                spinePath.elementAt(1).x + xOffset, 
+                                spinePath.elementAt(1).y + yOffset));
         
         directionLine.setP2(QPointF(
                                 spinePath.elementAt(0).x + xOffset, 

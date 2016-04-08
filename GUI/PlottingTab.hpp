@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,11 +34,8 @@
 #ifndef PLOTTINGTAB_HPP
 #define PLOTTINGTAB_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QWidget>
 #include <QRegExp>
-#pragma clang diagnostic pop
 
 #include "PlotSettings.hpp"
 #include "Utility/Plotter.hpp"
@@ -60,7 +57,7 @@ public:
     void setLarvaeContainerPointer(LarvaeContainer *larvaeContainer);
     
 public slots:
-    void setAvailableLarvaIDs(QStringList const& larvaIDs);
+    void setAvailableLarvaIDs();
     void setAvailableLandmarkNames(QStringList const& landmarkNames);
     void showCroppedImage(QImage const& img);
     void bookmarkCroppedTimeStemp(int timeStemp);

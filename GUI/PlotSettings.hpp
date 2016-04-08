@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,10 +34,7 @@
 #ifndef PLOTSETTINGS_HPP
 #define PLOTSETTINGS_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QWidget>
-#pragma clang diagnostic pop
 
 #include "Configuration/TrackerConfig.hpp"
 #include "PlotWindow.hpp"
@@ -57,8 +54,6 @@ public:
  
     
     uint                    getLarvaID() const {return this->mLarvaID;}
-//    PlotWindow*             getPlotWindowPointer() const {return this->mPlotWindow;}
-//    PlotWindow*             getLastAddedPlotWindowPointer() const {return this->mPlotWindows.last();}
     PlotWindow*             getLastModifiedPlotWindowPointer() const {return this->mLastModifiedPlotWindow;}
     
     int                     getCurrentTimeStep() const {return this->mCurrentTimeStep;}
@@ -69,12 +64,14 @@ public:
     
     void                    setAvailableLandmarkNames(QStringList const& landmarkNames);
     
+    
+public slots:
+    void                    updatePlotWindow();
 signals:
     void sendNewSubwindowPointer(PlotWindow*);
     void sendNewPlottingParameter(PlottingParameter const& p);
     
 private slots:
-    void                    updatePlotWindow();
     
     bool                    checkForPlottingWindow(QString plotWindoID);
     bool                    findPlottingWindow(QString plotWindoID, int &index);
@@ -94,8 +91,8 @@ private:
     
     QSize                   mImageSize;
     
-    LarvaeContainer         *mLarvaContainer = NULL;
-    PlotWindow              *mLastModifiedPlotWindow = NULL;
+    LarvaeContainer         *mLarvaContainer;
+    PlotWindow              *mLastModifiedPlotWindow;
     QVector<PlotWindow*>    mPlotWindows;
     Ui::PlotSettings        *ui;
 };

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,11 +34,8 @@
 #ifndef PLOTWINDOW_HPP
 #define PLOTWINDOW_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QMdiSubWindow>
 #include <QLayout>
-#pragma clang diagnostic pop
 
 #include "Utility/Plotter.hpp"
 
@@ -57,7 +54,7 @@ class PlotWindow : public QMdiSubWindow
     Q_OBJECT
     
 private:
-    Plotter             *mPlotter = NULL;
+    Plotter             *mPlotter;
     QString             mID;
     PlottingParameter   mPlottingParameter;
     
@@ -71,7 +68,7 @@ public:
     void        setImageSize(QSize const& size);
     
 signals:
-    void destroyed(QString);
+    void        destroyed(QString);
     
 public slots:
     void        plotDataAsLine(QVector<double> const& x, QVector<double> const& y);

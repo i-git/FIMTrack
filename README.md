@@ -1,7 +1,14 @@
 FIMTrack needs 
 
-- Qt (GUI)
-- OpenCV (Computer Vision Library)
+- [Qt] (https://www.qt.io/) for the UI
+- [OpenCV] (http://opencv.org/) as a Computer Vision Library
+- [QCustomPlot] (http://www.qcustomplot.com/) for plotting results
+
+To compile FIMTrack from source OpenCV 2.4.11 and Qt 5.5.1 are required. 
+Additionally after downloading QCustomPlot place the header and source 
+files in the "Utility" folder of FIMTrack. 
+
+### What is this repository for?
 
 FIMTrack is a larval tracking program to acquire locomotion trajectories 
 and conformation information of Drosophila melanogaster larvae. It is 
@@ -21,4 +28,4 @@ Details can be found in
   imaging and FIMTrack: Two new tools allowing high-throughput and 
   cost effective locomotion analysis. jove (in press)
 
-For more informations contact fim@uni-muenster.de
+For more informations contact fim[AT]uni-muenster[DOT]de

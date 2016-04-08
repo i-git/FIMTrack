@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,11 +34,60 @@
 #ifndef TRACKERCONFIG_HPP
 #define TRACKERCONFIG_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QString>
 #include <QStringList>
-#pragma clang diagnostic pop
+#include <vector>
+#include <opencv2/opencv.hpp>
+
+namespace FIMTypes
+{
+    /**
+     * @brief contourType is used to store contour points
+     */
+    typedef std::vector<cv::Point> contour_t;
+    /**
+     * @brief contourTypeF is used to store contour points with float coordinates
+     */
+    typedef std::vector<cv::Point2f> contourF_t;
+    /**
+     * @brief contourTypeD is used to store contour points with double coordinates
+     */
+    typedef std::vector<cv::Point2d> contourD_t;
+    /**
+     * @brief contoursType is used to store vectors of contourType
+     */
+    typedef std::vector<contour_t> contours_t;
+    /**
+     * @brief spineType is used to store spine points
+     */
+    typedef std::vector<cv::Point> spine_t;
+    /**
+     * @brief spineTypeF is used to store spine points with float coordinates
+     */
+    typedef std::vector<cv::Point2f> spineF_t;
+    /**
+     * @brief contourCurvatureType is used to store curvatures of contour points
+     */
+    typedef std::vector<double> contourCurvature_t;
+    /**
+     * @brief radiiType is used to store the radii of the discrete spine points
+     */
+    typedef std::vector<double> radii_t;
+    /**
+     * @brief BezierCurve contains control points of a Bezier Curve
+     */
+    typedef std::vector<cv::Point2d> BezierCurve_t;
+    /**
+     * @brief BezierCurves contains several Bezier Curves that approximate a digitized curve
+     */
+    typedef std::vector<BezierCurve_t> BezierCurves_t;
+}
+
+namespace StringConstats 
+{
+   extern std::string   fileFormats;
+   extern std::string   textFileCoding;
+}
 
 namespace GeneralParameters
 {
@@ -81,37 +130,60 @@ namespace LarvaeExtractionParameters
     
     namespace IPANContourCurvatureParameters 
     {
-    extern bool     bUseDynamicIpanParameterCalculation;
-    extern int      iMinimalTriangelSideLenght;
-    extern int      iMaximalTriangelSideLenght;
-    extern double   dMaximalCurvaturePointsDistance;
-    extern int      iCurvatureWindowSize;
+        extern bool     bUseDynamicIpanParameterCalculation;
+        extern int      iMinimalTriangelSideLenght;
+        extern int      iMaximalTriangelSideLenght;
+        extern double   dMaximalCurvaturePointsDistance;
+        extern int      iCurvatureWindowSize;
     }
     
     namespace CoiledRecognitionParameters 
     {
-    extern double   dPerimeterToSpinelenghtThreshold;
-    extern double   dMidcirclePerimeterToPerimeterThreshold;
+        extern double   dPerimeterToSpinelenghtThreshold;
+        extern double   dMidcirclePerimeterToPerimeterThreshold;
+        extern double   dMaxToMeanRadiusThreshold;
     }
-
+    
     namespace StopAndGoCalculation
     {
-    extern bool bUseDynamicStopAndGoParameterCalculation;
-    extern int iFramesForSpeedCalculation;
-    extern int iSpeedThreshold;
-    extern int iAngleThreshold;
+        extern bool bUseDynamicStopAndGoParameterCalculation;
+        extern int iFramesForSpeedCalculation;
+        extern int iSpeedThreshold;
+        extern int iAngleThreshold;
     }
-
+    
     namespace BodyBendingParameters
     {
-    extern bool bUseDynamicBodyBendingCalculation;
-    extern double dAngleThreshold;
+        extern bool bUseDynamicBodyBendingCalculation;
+        extern double dAngleThreshold;
     }
-
+    
     namespace MovementDirectionParameters
     {
-    extern bool bUseDynamicMovementDirectionParameterCalculation;
-    extern int iFramesForMovementDirectionCalculation;
+        extern bool bUseDynamicMovementDirectionParameterCalculation;
+        extern int iFramesForMovementDirectionCalculation;
+    }
+    
+    namespace AssignmentParameters
+    {
+        
+        enum AssignmentMethod 
+        {
+            HUNGARIAN, 
+            GREEDY
+        };
+        
+        enum CostMeasure
+        {
+            MOMENTUM, 
+            OVERLAP, 
+            MID_SPINE_POINT
+        };
+        
+        extern AssignmentMethod eAssignmentMethod;
+        extern CostMeasure eCostMeasure;
+        extern double dDistanceThreshold;
+        extern double dOverlapThreshold;
     }
 }
 

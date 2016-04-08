@@ -4,17 +4,15 @@ namespace Algorithms
 {
     Hungarian::Hungarian()
     {
-        this->mIsInit = false;
+        this->_isInit = false;
     }
     
-    Hungarian::Hungarian(cv::Mat_<double> const& inputMatrix, 
-                         MODE mode)
+    Hungarian::Hungarian(cv::Mat_<double> const& inputMatrix, MODE mode)
     {
         this->solve(inputMatrix, mode);
     }
     
-    void Hungarian::solve(cv::Mat_<double> const& inputMatrix, 
-                          MODE mode)
+    void Hungarian::solve(cv::Mat_<double> const& inputMatrix, MODE mode)
     {
         this->init(inputMatrix, mode);
         this->runMunkres();
@@ -22,31 +20,30 @@ namespace Algorithms
     
     double Hungarian::cost() const
     {
-        return this->mCost;
+        return this->_cost;
     }  
     
-    void Hungarian::init(cv::Mat_<double> const& inputMatrix, 
-                         MODE mode)
-    {
-        this->mIsInit = true;
-        this->mCost     = 0.0;
-        this->mMaxCost  = 0.0;
-        this->mCols     = std::max(inputMatrix.cols, inputMatrix.rows);//inputMatrix.cols;
-        this->mRows     = this->mCols;//inputMatrix.rows;
+    void Hungarian::init(cv::Mat_<double> const& inputMatrix, MODE mode)
+    {        
+        this->_isInit = true;
+        this->_cost     = 0.0;
+        this->_maxCost  = 0.0;
+        this->_cols     = std::max(inputMatrix.cols, inputMatrix.rows);
+        this->_rows     = this->_cols;
         
-        this->mCostMatrixOriginal = inputMatrix;
+        this->_costMatrixOriginal = inputMatrix;
         
-        this->mRowsCovered.clear();
-        this->mRowsCovered.resize(this->mRows, false);
+        this->_rowsCovered.clear();
+        this->_rowsCovered.resize(this->_rows, false);
         
-        this->mColsCovered.clear();
-        this->mColsCovered.resize(this->mCols, false);
+        this->_colsCovered.clear();
+        this->_colsCovered.resize(this->_cols, false);
         
-        this->mStarsInCol.clear();
-        this->mStarsInCol.resize(this->mCols, 0);
+        this->_starsInCol.clear();
+        this->_starsInCol.resize(this->_cols, 0);
         
-        this->mPath.clear();
-        this->mPath.resize(std::max(this->mCols, this->mRows) * 2, std::pair<int,int>(-1,-1));
+        this->_path.clear();
+        this->_path.resize(std::max(this->_cols, this->_rows) * 2, std::pair<int,int>(-1,-1));
         
         /*
          * Generate the expanded cost matrix by adding extra 0-valued elements in
@@ -54,33 +51,32 @@ namespace Algorithms
          * in the matrix (used later if we want to maximize rather than minimize the
          * overall cost.)
          */
-//        this->mCostMatrix = cv::Mat::zeros(this->mRows, this->mCols, CV_64F);
-        this->mCostMatrix = cv::Mat::zeros(this->mCostMatrixOriginal.rows, this->mCostMatrixOriginal.cols, CV_64F);
+        this->_costMatrix = cv::Mat::zeros(this->_costMatrixOriginal.rows, this->_costMatrixOriginal.cols, CV_64F);
         
-        for(int row = 0; row < this->mCostMatrixOriginal.rows/*this->mRows*/; ++row) 
+        for(int row = 0; row < this->_costMatrixOriginal.rows; ++row) 
         {
-            for(int col = 0; col < this->mCostMatrixOriginal.cols/*this->mCols*/; ++col) 
+            for(int col = 0; col < this->_costMatrixOriginal.cols; ++col) 
             {
-                this->mCostMatrix.at<double>(row,col) = inputMatrix.at<double>(row,col);//(row < inputMatrix.rows && col < inputMatrix.cols) ? (inputMatrix.at<double>(row,col)) : std::numeric_limits<double>::max()/*0.0*/;
-                this->mMaxCost = std::max(this->mMaxCost, this->mCostMatrix.at<double>(row,col));
+                this->_costMatrix.at<double>(row,col) = inputMatrix.at<double>(row,col);
+                this->_maxCost = std::max(this->_maxCost, this->_costMatrix.at<double>(row,col));
             }
         }
         
         // Initially, none of the cells of the matrix are marked.
-        this->mMarks = cv::Mat::zeros(this->mRows, this->mCols, CV_8U);
+        this->_marks = cv::Mat::zeros(this->_rows, this->_cols, CV_8UC1);
         
-        if(this->mCostMatrixOriginal.rows != this->mCostMatrixOriginal.cols)
+        if(this->_costMatrixOriginal.rows != this->_costMatrixOriginal.cols)
         {
-            this->padMatrix(this->mMaxCost);
+            this->padMatrix(this->_maxCost);
         }
         
         if (mode == HUNGARIAN_MODE_MAXIMIZE_UTIL) 
         {
-            for(int row = 0; row < this->mRows; ++row) 
+            for(int row = 0; row < this->_rows; ++row) 
             {
-                for(int col = 0; col < this->mCols; ++col) 
+                for(int col = 0; col < this->_cols; ++col) 
                 {
-                    this->mCostMatrix.at<double>(row,col) =  this->mMaxCost - this->mCostMatrix.at<double>(row,col);
+                    this->_costMatrix.at<double>(row,col) =  this->_maxCost - this->_costMatrix.at<double>(row,col);
                 }
             }
         }
@@ -94,67 +90,70 @@ namespace Algorithms
     
     void Hungarian::padMatrix(double padValue)
     {
+        if(_costMatrix.rows == 0 || _costMatrix.cols == 0)
+            return;
+        
         // we have to add some rows
-        if(this->mCostMatrixOriginal.rows < this->mCostMatrixOriginal.cols)
+        if(this->_costMatrixOriginal.rows < this->_costMatrixOriginal.cols)
         {
-            int times = this->mCostMatrixOriginal.cols - this->mCostMatrixOriginal.rows;
+            int times = this->_costMatrixOriginal.cols - this->_costMatrixOriginal.rows;
             for(int i = 0; i < times; ++i)
             {
-                cv::Mat row = cv::Mat::ones(1, this->mCostMatrixOriginal.cols, CV_64F);
+                cv::Mat row = cv::Mat::ones(1, this->_costMatrixOriginal.cols, CV_64F);
                 row *= padValue;
-                this->mCostMatrix.push_back(row);
+                this->_costMatrix.push_back(row);
             }
         }
         else
         {
-            int times = this->mCostMatrixOriginal.rows - this->mCostMatrixOriginal.cols;
+            int times = this->_costMatrixOriginal.rows - this->_costMatrixOriginal.cols;
             for(int i = 0; i < times; ++i)
             {
-                cv::Mat col = cv::Mat::ones(this->mCostMatrixOriginal.rows, 1, CV_64F);
+                cv::Mat col = cv::Mat::ones(this->_costMatrixOriginal.rows, 1, CV_64F);
                 col *= padValue;
-                cv::hconcat(this->mCostMatrix, col, this->mCostMatrix);
+                cv::hconcat(this->_costMatrix, col, this->_costMatrix);
             }
         }
     }
     
     bool Hungarian::isRowCovered(int row) const
     {
-        return this->mRowsCovered.at(row);
+        return this->_rowsCovered.at(row);
     }
     
     void Hungarian::coverRow(int row)
     {
-        this->mRowsCovered.at(row) = true;
+        this->_rowsCovered.at(row) = true;
     }
     
     void Hungarian::uncoverRow(int row)
     {
-        this->mRowsCovered.at(row) = false;
+        this->_rowsCovered.at(row) = false;
     }
     
     bool Hungarian::isColCovered(int col) const
     {
-        return this->mColsCovered.at(col);
+        return this->_colsCovered.at(col);
     }
     
     void Hungarian::coverCol(int col)
     {
-        this->mColsCovered.at(col) = true;
+        this->_colsCovered.at(col) = true;
     }
     
     void Hungarian::uncoverCol(int col)
     {
-        this->mColsCovered.at(col) = false;
+        this->_colsCovered.at(col) = false;
     }
     
     void Hungarian::clearCovers()
     {
-        for(int col = 0; col < this->mCols; ++col)
+        for(int col = 0; col < this->_cols; ++col)
         {
             this->uncoverCol(col);
         }
         
-        for(int row = 0; row < this->mRows; ++row)
+        for(int row = 0; row < this->_rows; ++row)
         {
             this->uncoverRow(row);
         }
@@ -162,43 +161,43 @@ namespace Algorithms
     
     bool Hungarian::isZeroStarred(int row, int col) const
     {
-        return this->mMarks.at<uchar>(row, col) == STAR;
+        return this->_marks.at<uchar>(row, col) == STAR;
     }
     
     void Hungarian::starZero(int row, int col)
     {
-        this->mMarks.at<uchar>(row, col) = STAR;
-        ++this->mStarsInCol.at(col);
+        this->_marks.at<uchar>(row, col) = STAR;
+        ++this->_starsInCol.at(col);
     }
     
     void Hungarian::unStarZero(int row, int col)
     {
-        this->mMarks.at<uchar>(row, col) = NONE;
-        --this->mStarsInCol.at(col);
+        this->_marks.at<uchar>(row, col) = NONE;
+        --this->_starsInCol.at(col);
     }
     
     bool Hungarian::colContainsStarredZero(int col) const
     {
-        return this->mStarsInCol.at(col) > 0;
+        return this->_starsInCol.at(col) > 0;
     }
     
     bool Hungarian::findUncoveredZero(int &zeroRow, int &zeroCol) const
     {
-        for(int row = 0; row < this->mRows; ++row)
+        for(int row = 0; row < this->_rows; ++row)
         {
             if(this->isRowCovered(row))
             {
                 continue;
             }
             
-            for(int col = 0; col < this->mCols; ++col)
+            for(int col = 0; col < this->_cols; ++col)
             {
                 if(this->isColCovered(col))
                 {
                     continue;
                 }
                 
-                if(this->mCostMatrix.at<double>(row, col) == 0.0)
+                if(this->_costMatrix.at<double>(row, col) == 0.0)
                 {
                     zeroRow = row;
                     zeroCol = col;
@@ -212,22 +211,22 @@ namespace Algorithms
     
     bool Hungarian::isZeroPrimed(int row, int col) const
     {
-        return this->mMarks.at<uchar>(row, col) == PRIME;
+        return this->_marks.at<uchar>(row, col) == PRIME;
     }
     
     void Hungarian::primeZero(int row, int col)
     {
-        this->mMarks.at<uchar>(row, col) = PRIME;
+        this->_marks.at<uchar>(row, col) = PRIME;
     }
     
     void Hungarian::unPrimeZero(int row, int col)
     {
-        this->mMarks.at<uchar>(row, col) = NONE;
+        this->_marks.at<uchar>(row, col) = NONE;
     }
     
     int Hungarian::findPrimedZeroInRow(int row) const
     {
-        for(int col = 0; col < this->mCols; ++col)
+        for(int col = 0; col < this->_cols; ++col)
         {
             if(this->isZeroPrimed(row, col))
             {
@@ -240,9 +239,9 @@ namespace Algorithms
     
     void Hungarian::clearPrimes()
     {
-        for(int row = 0; row < this->mRows; ++row)
+        for(int row = 0; row < this->_rows; ++row)
         {
-            for(int col = 0; col < this->mCols; ++col)
+            for(int col = 0; col < this->_cols; ++col)
             {
                 if(this->isZeroPrimed(row, col))
                 {
@@ -254,7 +253,7 @@ namespace Algorithms
     
     int Hungarian::findStarInRow(int row) const
     {
-        for(int col = 0; col < this->mCols; ++col)
+        for(int col = 0; col < this->_cols; ++col)
         {
             if(this->isZeroStarred(row, col))
             {
@@ -272,7 +271,7 @@ namespace Algorithms
             return ROWNOTFOUND;
         }
         
-        for (int row = 0; row < this->mRows; ++row) 
+        for (int row = 0; row < this->_rows; ++row) 
         {
             if (this->isZeroStarred(row, col)) 
             {
@@ -290,8 +289,8 @@ namespace Algorithms
         int col;
         for(int i = 0; i <= pathLength; ++i)
         {
-            row = this->mPath.at(i).first;
-            col = this->mPath.at(i).second;
+            row = this->_path.at(i).first;
+            col = this->_path.at(i).second;
             
             if(this->isZeroStarred(row, col))
             {
@@ -307,21 +306,21 @@ namespace Algorithms
     double Hungarian::findSmallestUncoveredValue() const
     {
         double minValue = std::numeric_limits<double>::max();
-        for(int row = 0; row < this->mRows; ++row)
+        for(int row = 0; row < this->_rows; ++row)
         {
             if(this->isRowCovered(row))
             {
                 continue;
             }
             
-            for(int col = 0; col < this->mCols; ++col)
+            for(int col = 0; col < this->_cols; ++col)
             {
                 if(this->isColCovered(col))
                 {
                     continue;
                 }
                 
-                minValue = std::min(minValue, this->mCostMatrix.at<double>(row, col));
+                minValue = std::min(minValue, this->_costMatrix.at<double>(row, col));
             }
         }
         
@@ -330,21 +329,21 @@ namespace Algorithms
     
     void Hungarian::findAssignments()
     {
-        this->mAssignment.clear();
-        for(int row = 0; row < this->mCostMatrixOriginal.rows/*this->mRows*/; ++row)
+        this->_assignment.clear();
+        for(int row = 0; row < this->_costMatrixOriginal.rows/*this->mRows*/; ++row)
         {
-            for(int col = 0; col < this->mCostMatrixOriginal.cols/*this->mCols*/; ++col)
+            for(int col = 0; col < this->_costMatrixOriginal.cols/*this->mCols*/; ++col)
             {
                 if(this->isZeroStarred(row, col))
                 {
-                    this->mAssignment.push_back(std::pair<int, int>(row, col));
-                    this->mCost += this->mCostMatrixOriginal.at<double>(row, col);
+                    this->_assignment.push_back(std::pair<int, int>(row, col));
+                    this->_cost += this->_costMatrixOriginal.at<double>(row, col);
                     break;
                 }
             }
         }
         
-        if(this->mAssignment.size() != std::min(this->mCostMatrixOriginal.rows, this->mCostMatrixOriginal.cols)/*std::min(this->mRows, this->mCols)*/)
+        if(this->_assignment.size() != std::min(this->_costMatrixOriginal.rows, this->_costMatrixOriginal.cols))
         {
             std::cerr << std::endl << "could not provide a complete assignment" << std::endl << std::endl;
         }
@@ -352,13 +351,13 @@ namespace Algorithms
     
     void Hungarian::showCostMatrix()
     {
-        for (int row = 0; row < this->mRows; ++row)
+        for (int row = 0; row < this->_rows; ++row)
         {
             std::cout << "\n";
             std::cout << "     ";
-            for (int col = 0; col < this->mCols; ++col)
+            for (int col = 0; col < this->_cols; ++col)
             {
-                std::cout << this->mCostMatrix.at<double>(row, col);
+                std::cout << this->_costMatrix.at<double>(row, col);
                 if (this->isZeroStarred(row, col)) 
                 {
                     std::cout << "* ";
@@ -379,16 +378,16 @@ namespace Algorithms
     void Hungarian::showMaskMatrix()
     {
         std::cout << "\n    ";
-        for (int col = 0; col < this->mCols; ++col)
+        for (int col = 0; col < this->_cols; ++col)
         {
             std::cout << " " << this->isColCovered(col);
         }
-        for (int row = 0; row < this->mRows; ++row)
+        for (int row = 0; row < this->_rows; ++row)
         {
             std::cout << "\n  " << this->isRowCovered(row) << "  ";
-            for (int col = 0; col < this->mCols; ++col)
+            for (int col = 0; col < this->_cols; ++col)
             {
-                std::cout << static_cast<unsigned int>(this->mMarks.at<uchar>(row, col)) << " ";
+                std::cout << static_cast<unsigned int>(this->_marks.at<uchar>(row, col)) << " ";
             }
         }
         std::cout << "\n";
@@ -397,15 +396,15 @@ namespace Algorithms
     void Hungarian::showAssignment()
     {
         std::cout << "\n#(Tracker -> Point)\n[";
-        for(size_t i = 0; i < this->mAssignment.size(); ++i)
+        for(size_t i = 0; i < this->_assignment.size(); ++i)
         {
-            if(i != this->mAssignment.size() - 1)
+            if(i != this->_assignment.size() - 1)
             {
-                std::cout << "(" << this->mAssignment.at(i).first << " -> " << this->mAssignment.at(i).second << "), ";
+                std::cout << "(" << this->_assignment.at(i).first << " -> " << this->_assignment.at(i).second << "), ";
             }
             else
             {
-                std::cout << "(" << this->mAssignment.at(i).first << " -> " << this->mAssignment.at(i).second << ")";
+                std::cout << "(" << this->_assignment.at(i).first << " -> " << this->_assignment.at(i).second << ")";
             }
         }
         std::cout << "] => Cost = " << this->cost() << "\n";
@@ -420,17 +419,17 @@ namespace Algorithms
      */
     int Hungarian::stepOne()
     {
-        for(int row = 0; row < this->mRows; ++row)
+        for(int row = 0; row < this->_rows; ++row)
         {
-            double minCostInRow = this->mCostMatrix.at<double>(row, 0);
-            for(int col = 1; col < this->mCols; ++col)
+            double minCostInRow = this->_costMatrix.at<double>(row, 0);
+            for(int col = 1; col < this->_cols; ++col)
             {
-                minCostInRow = std::min(minCostInRow, this->mCostMatrix.at<double>(row, col));
+                minCostInRow = std::min(minCostInRow, this->_costMatrix.at<double>(row, col));
             }
             
-            for(int col = 0; col < this->mCols; ++col)
+            for(int col = 0; col < this->_cols; ++col)
             {
-                this->mCostMatrix.at<double>(row, col) -= minCostInRow;
+                this->_costMatrix.at<double>(row, col) -= minCostInRow;
             }
         }
         
@@ -446,21 +445,21 @@ namespace Algorithms
      */
     int Hungarian::stepTwo()
     {
-        for(int row = 0; row < this->mRows; ++row)
+        for(int row = 0; row < this->_rows; ++row)
         {
             if(this->isRowCovered(row))
             {
                 continue;
             }
             
-            for(int col = 0; col < this->mCols; ++col)
+            for(int col = 0; col < this->_cols; ++col)
             {
                 if(this->isColCovered(col))
                 {
                     continue;
                 }
                 
-                if(this->mCostMatrix.at<double>(row,col) == 0.0)
+                if(this->_costMatrix.at<double>(row,col) == 0.0)
                 {
                     this->starZero(row,col);
                     this->coverRow(row);
@@ -484,9 +483,9 @@ namespace Algorithms
     {
         int coveredColums = 0;
         
-        for(int row = 0; row < this->mRows; ++row)
+        for(int row = 0; row < this->_rows; ++row)
         {
-            for(int col = 0; col < this->mCols; ++col)
+            for(int col = 0; col < this->_cols; ++col)
             {
                 if(this->isZeroStarred(row, col))
                 {
@@ -495,7 +494,7 @@ namespace Algorithms
             }
         }
         
-        for(int col = 0; col < this->mCols; ++col)
+        for(int col = 0; col < this->_cols; ++col)
         {
             if(this->isColCovered(col))
             {
@@ -503,7 +502,7 @@ namespace Algorithms
             }
         }
         
-        if(coveredColums >= this->mCols || coveredColums >= this->mRows)
+        if(coveredColums >= this->_cols || coveredColums >= this->_rows)
         {
             return 7;
         }
@@ -542,8 +541,8 @@ namespace Algorithms
                 }
                 else
                 {
-                    this->mPath.at(0).first = zeroRow;
-                    this->mPath.at(0).second = zeroCol;
+                    this->_path.at(0).first = zeroRow;
+                    this->_path.at(0).second = zeroCol;
                     return 5;
                 }
             }
@@ -572,13 +571,13 @@ namespace Algorithms
         while(!done)
         {
             // First construct the alternating path...
-            row = findStarInCol(this->mPath.at(pathLength).second);
+            row = findStarInCol(this->_path.at(pathLength).second);
             
             if(row != ROWNOTFOUND)
             {
                 ++pathLength;
-                this->mPath.at(pathLength).first = row;
-                this->mPath.at(pathLength).second = this->mPath.at(pathLength-1).second;
+                this->_path.at(pathLength).first = row;
+                this->_path.at(pathLength).second = this->_path.at(pathLength-1).second;
             }
             else
             {
@@ -587,10 +586,10 @@ namespace Algorithms
             
             if(!done)
             {
-                col = this->findPrimedZeroInRow(this->mPath.at(pathLength).first);
+                col = this->findPrimedZeroInRow(this->_path.at(pathLength).first);
                 ++pathLength;
-                this->mPath.at(pathLength).first = this->mPath.at(pathLength-1).first;
-                this->mPath.at(pathLength).second = col;
+                this->_path.at(pathLength).first = this->_path.at(pathLength-1).first;
+                this->_path.at(pathLength).second = col;
             }
         }
         
@@ -614,18 +613,18 @@ namespace Algorithms
     {
         double minValue = this->findSmallestUncoveredValue();
         
-        for(int row = 0; row < this->mRows; ++row)
+        for(int row = 0; row < this->_rows; ++row)
         {
-            for(int col = 0; col < this->mCols; ++col)
+            for(int col = 0; col < this->_cols; ++col)
             {
                 if(this->isRowCovered(row))
                 {
-                    this->mCostMatrix.at<double>(row, col) += minValue;
+                    this->_costMatrix.at<double>(row, col) += minValue;
                 }
                 
                 if(!this->isColCovered(col))
                 {
-                    this->mCostMatrix.at<double>(row, col) -= minValue;
+                    this->_costMatrix.at<double>(row, col) -= minValue;
                 }
             }
         }
@@ -647,17 +646,11 @@ namespace Algorithms
             this->showAssignment();
             std::cout << "-------------------------------" << std::endl;
         }
-//        else
-//        {
-//            std::cout << "---------Run Complete----------";
-//            this->showAssignment();
-//            std::cout << "-------------------------------" << std::endl;
-//        }
     }
     
     void Hungarian::runMunkres()
     {
-        if(this->mIsInit)
+        if(this->_isInit)
         {
             bool done = false;
             int step = 1;
@@ -704,12 +697,12 @@ namespace Algorithms
     
     std::vector<std::pair<int, int> > const& Hungarian::getAssignment() const
     {
-        return this->mAssignment;
+        return this->_assignment;
     }
     
     cv::Mat Hungarian::getAssignmentAsMatrix()
     {
-        cv::Mat ret = this->mMarks(cv::Rect(0, 0 , this->mCostMatrixOriginal.cols, this->mCostMatrixOriginal.rows)).clone();
+        cv::Mat ret = this->_marks(cv::Rect(0, 0 , this->_costMatrixOriginal.cols, this->_costMatrixOriginal.rows)).clone();
         return ret;
     }
     

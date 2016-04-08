@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,22 +34,22 @@
 #ifndef TRACKERSCENE_HPP
 #define TRACKERSCENE_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QGraphicsScene>
 #include <QPixmap>
 #include <QRect>
 #include <QGraphicsRectItem>
 #include <QGraphicsSceneMouseEvent>
+#include <QInputDialog>
 
 #include <QDebug>
-#pragma clang diagnostic pop
 
 #include "Data/Larva.hpp"
 #include "Control/InputGenerator.hpp"
 #include "TrackerSceneLarva.hpp"
 #include "RegionOfInterestContainer.hpp"
 #include "LandmarkContainer.hpp"
+
+class TrackerSceneLarva;
 
 class TrackerScene : public QGraphicsScene
 {
@@ -59,18 +59,6 @@ public:
     ~TrackerScene();
     
     TrackerSceneLarva* addLarva(Larva *larva, QColor color);
-    
-//    void updateLarvae(unsigned int time);
-    
-    /**
-    * Sets the ROI
-    *
-    * @param x x-Coordinate of top left point
-    * @param y y-Coordinate of top left point
-    * @param w width
-    * @param h height
-    */
-//    void setRect (int x, int y, int w, int h);
         
     /**
     * Sets the image to be displayed
@@ -144,7 +132,6 @@ private:
     QGraphicsPixmapItem*                            mImage;	
     
     void checkForRIOContainer();
-    void checkForLandmakContainer();
 };
 
 #endif // TRACKERSCENE_HPP

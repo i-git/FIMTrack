@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,12 +34,8 @@
 #ifndef LANDMARK_HPP
 #define LANDMARK_HPP
 
-//#define _USE_MATH_DEFINES
-
 #include "Configuration/FIMTrack.hpp"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QString>
 #include <QTime>
 #include <QRectF>
@@ -55,7 +51,6 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
 #include <QGraphicsSceneHoverEvent>
-#pragma clang diagnostic pop
 
 class Landmark : public QObject, public QGraphicsItemGroup
 {
@@ -158,7 +153,7 @@ public:
     };
     
     Landmark();
-    Landmark(/*QGraphicsScene* parentScene, */QString const& name, qreal xPos, qreal yPos, int type);
+    Landmark(QString const& name, qreal xPos, qreal yPos, int type);
     ~Landmark(); 
     
     /// GETTER

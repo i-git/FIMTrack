@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -33,10 +33,10 @@
 
 #include "Arrow.hpp"
 
-Arrow::Arrow(QGraphicsItem *parent, QGraphicsScene *scene)
-    : QGraphicsLineItem(parent, scene)
+Arrow::Arrow(QGraphicsItem *parent)
+    : QGraphicsLineItem(parent)
 {
-    this->mColor        = Qt::red;//QColor(qrand() % 256, qrand() % 256, qrand() % 256);
+    this->mColor        = Qt::red;
     
     this->setFlag(QGraphicsItem::ItemIsSelectable, false);
     this->setPen(QPen(this->mColor, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));

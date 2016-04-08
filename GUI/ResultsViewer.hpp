@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,12 +34,8 @@
 #ifndef RESULTSVIEWER_HPP
 #define RESULTSVIEWER_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QtCore>
 #include <QtGui>
-#pragma clang diagnostic pop
-
 #include <vector>
 
 #include "Configuration/FIMTrack.hpp"
@@ -74,12 +70,14 @@ public:
 signals:
     void newTimeStep(unsigned int);
     void sendShortestLarvaeTrackLength(uint);
-    void sendAvailableLarvaIDs(QStringList const&);
+    void sendAvailableLarvaIDs();
     
     void sendCroppedImage(QImage const&);
     void sendPlottingTimeStemp(int);
     
     void sendNewImageSize(QSize);
+    
+    void sendMaximumNumberOfTimePoints(int);
     
 public slots:
     void cropImage(uint larvaID);

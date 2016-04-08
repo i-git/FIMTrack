@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -33,25 +33,16 @@
 
 #include "LarvaeContainer.hpp"
 
-struct SplineSet
-{
-    double a;
-    double b;
-    double c;
-    double d;
-    double x;
-};
-
 LarvaeContainer::LarvaeContainer(QObject *parent) :
     QObject(parent)
 {
     this->mMaxSpineLength = 0.0;
 }
 
-Larva* LarvaeContainer::createDefaultLarva(uint timeStep)
+Larva* LarvaeContainer::createDefaultLarva(const uint timeStep)
 {
     Q_UNUSED(timeStep);
-    return NULL;
+    return nullptr;
 }
 
 void LarvaeContainer::readLarvae(const QString &ymlFileName, 
@@ -63,9 +54,9 @@ void LarvaeContainer::readLarvae(const QString &ymlFileName,
                                      imgPaths,
                                      useUndist);
     double spineLength;
-    for(Larva l : this->mLarvae)
+    foreach(Larva l, this->mLarvae)
     {
-        for(uint t : l.getAllTimeSteps())
+        foreach(uint t, l.getAllTimeSteps())
         {
             if(l.getSpineLengthAt(t, spineLength))
             {
@@ -74,7 +65,7 @@ void LarvaeContainer::readLarvae(const QString &ymlFileName,
         }
     }
     
-    for(int i = 0; i < this->mLarvae.size(); ++i)
+    for(size_t i = 0; i < this->mLarvae.size(); ++i)
         this->recalculateLarvaVelocityAndAcceleration(i);
 }
 
@@ -93,26 +84,26 @@ void LarvaeContainer::updateLandmark(Landmark const* l)
     
     switch(l->getType())
     {
-    case Landmark::POINT:
-        p = l->getPoint();
-        this->calcLandmarkParameter(name, p);
-        break;
-    case Landmark::LINE:
-        lin = l->getLine();
-        this->calcLandmarkParameter(name, lin);
-        break;
-    case Landmark::RECTANGLE:
-        r = l->getRectagle();
-        this->calcLandmarkParameter(name, r, false);
-        break;
-    case Landmark::ELLIPSE:
-        r = l->getEllipse();
-        this->calcLandmarkParameter(name, r, true);
-        break;
+        case Landmark::POINT:
+            p = l->getPoint();
+            this->calcLandmarkParameter(name, p);
+            break;
+        case Landmark::LINE:
+            lin = l->getLine();
+            this->calcLandmarkParameter(name, lin);
+            break;
+        case Landmark::RECTANGLE:
+            r = l->getRectagle();
+            this->calcLandmarkParameter(name, r, false);
+            break;
+        case Landmark::ELLIPSE:
+            r = l->getEllipse();
+            this->calcLandmarkParameter(name, r, true);
+            break;
     }
 }
 
-void LarvaeContainer::removeLandmark(QString name)
+void LarvaeContainer::removeLandmark(const QString name)
 {
     std::vector<uint> timeSteps;
     std::string stdName = QtOpencvCore::qstr2str(name);
@@ -128,7 +119,7 @@ void LarvaeContainer::removeLandmark(QString name)
     }
 }
 
-void LarvaeContainer::removeShortTracks(uint minTrackLenght)
+void LarvaeContainer::removeShortTracks(const uint minTrackLenght)
 {
     QVector<uint> removedLarvae;   
     this->mLarvae.erase(
@@ -151,6 +142,11 @@ void LarvaeContainer::removeShortTracks(uint minTrackLenght)
     {
         emit sendRemovedResultLarvaID(i);   
     }
+}
+
+void LarvaeContainer::setMaximumNumberOfTimePoints(const int maxTimePoints)
+{
+    this->mMaximumNumberOfTimePoints = maxTimePoints;
 }
 
 QPair<QVector<uint>, QVector<uint> > LarvaeContainer::getVisibleLarvaID(uint time)
@@ -176,7 +172,7 @@ QPair<QVector<uint>, QVector<uint> > LarvaeContainer::getVisibleLarvaID(uint tim
     return QPair<QVector<uint>, QVector<uint> >(visibleLarvae, invisibleLarvae);
 }
 
-QStringList LarvaeContainer::getAllTimestepsBefore(uint id, uint time)
+QStringList LarvaeContainer::getAllTimestepsBefore(const uint id, const uint time)
 {
     QStringList result;
     size_t larvaIndex;
@@ -202,7 +198,7 @@ QStringList LarvaeContainer::getAllTimestepsBefore(uint id, uint time)
     return result;
 }
 
-QStringList LarvaeContainer::getAllTimestepsAfter(uint id, uint time)
+QStringList LarvaeContainer::getAllTimestepsAfter(const uint id, const uint time)
 {
     QStringList result;
     size_t larvaIndex;
@@ -228,7 +224,7 @@ QStringList LarvaeContainer::getAllTimestepsAfter(uint id, uint time)
     return result;
 }
 
-QStringList LarvaeContainer::getAllContemplableLarvaeIDsForAttach(uint id)
+QStringList LarvaeContainer::getAllContemplableLarvaeIDsForAttach(const uint id)
 {
     QStringList result;
     for(size_t i = 0; i < this->mLarvae.size(); ++i)
@@ -242,7 +238,7 @@ QStringList LarvaeContainer::getAllContemplableLarvaeIDsForAttach(uint id)
     return result;
 }
 
-void LarvaeContainer::invertLarva(uint larvaID, uint currentTime, uint toTime)
+void LarvaeContainer::invertLarva(const uint larvaID, const uint currentTime, const uint toTime)
 {    
     /* past */
     if(toTime < currentTime)
@@ -281,7 +277,7 @@ void LarvaeContainer::invertLarva(uint larvaID, uint currentTime, uint toTime)
     }
 }
 
-void LarvaeContainer::attachToLarva(uint toLarvaID, uint fromLarvaID)
+void LarvaeContainer::attachToLarva(const uint toLarvaID, const uint fromLarvaID)
 {
     size_t indexToLarva;
     size_t indexFromLarva;
@@ -323,7 +319,7 @@ void LarvaeContainer::attachToLarva(uint toLarvaID, uint fromLarvaID)
     }
 }
 
-bool LarvaeContainer::copyModel2PrevTimeStep(uint larvaID, uint currentTime)
+bool LarvaeContainer::copyModel2PrevTimeStep(const uint larvaID, const uint currentTime)
 {
     size_t larvaIndex;
     if(this->getIndexOfLarva(larvaID, larvaIndex))
@@ -350,7 +346,7 @@ bool LarvaeContainer::copyModel2PrevTimeStep(uint larvaID, uint currentTime)
     return false;
 }
 
-bool LarvaeContainer::copyModel2NextTimeStep(uint larvaID, uint currentTime)
+bool LarvaeContainer::copyModel2NextTimeStep(const uint larvaID, const uint currentTime)
 {
     size_t larvaIndex;
     if(this->getIndexOfLarva(larvaID, larvaIndex))
@@ -365,7 +361,7 @@ bool LarvaeContainer::copyModel2NextTimeStep(uint larvaID, uint currentTime)
     return false;
 }
 
-void LarvaeContainer::recalculateLarvaDistanceParameter(uint larvaID)
+void LarvaeContainer::recalculateLarvaDistanceParameter(const uint larvaID)
 {
     size_t larvaIndex;
     if(this->getIndexOfLarva(larvaID, larvaIndex))
@@ -375,7 +371,7 @@ void LarvaeContainer::recalculateLarvaDistanceParameter(uint larvaID)
     }
 }
 
-void LarvaeContainer::recalculateLarvaDistanceToOrigin(size_t larvaIndex)
+void LarvaeContainer::recalculateLarvaDistanceToOrigin(const size_t larvaIndex)
 {
     std::vector<uint> timeSteps = this->mLarvae.at(larvaIndex).getAllTimeSteps();
     cv::Point p0 = this->mLarvae.at(larvaIndex).getOrigin();
@@ -389,7 +385,7 @@ void LarvaeContainer::recalculateLarvaDistanceToOrigin(size_t larvaIndex)
     }
 }
 
-void LarvaeContainer::recalculateLarvaMomentumDistance(size_t larvaIndex)
+void LarvaeContainer::recalculateLarvaMomentumDistance(const size_t larvaIndex)
 {
     std::vector<uint> timeSteps = this->mLarvae.at(larvaIndex).getAllTimeSteps();
     cv::Point p1;
@@ -410,13 +406,13 @@ void LarvaeContainer::recalculateLarvaMomentumDistance(size_t larvaIndex)
     }
 }
 
-void LarvaeContainer::recalculateLarvaVelocityAndAcceleration(size_t larvaIndex)
+void LarvaeContainer::recalculateLarvaVelocityAndAcceleration(const size_t larvaIndex)
 {
     std::vector<uint> time = this->mLarvae.at(larvaIndex).getAllTimeSteps();
     cv::Point p0;
     cv::Point p1;
     double velosity = 0.0;
-    int frameWindow = static_cast<int>(std::round(CameraParameter::dFPS));
+    int frameWindow = static_cast<int>(cvRound(CameraParameter::dFPS));
     
     for(int i = time.size()-1; i >= frameWindow; --i)
     {
@@ -432,9 +428,7 @@ void LarvaeContainer::recalculateLarvaVelocityAndAcceleration(size_t larvaIndex)
             if (this->mLarvae.at(larvaIndex).getSpinePointAt(t0,mLarvae.at(larvaIndex).getNSpinePoints()-1, p0) &&
                     this->mLarvae.at(larvaIndex).getSpinePointAt(t1,mLarvae.at(larvaIndex).getNSpinePoints()-1, p1))
             {
-                velosity     = Calc::eucledianDist(p0, p1) / static_cast<double>(std::abs(t1-t0));//(static_cast<double>(t0) - static_cast<double>(t1));
-                velosity     *= CameraParameter::dScaleFactor;  // cm per second
-                velosity     *= 10.0;                           // mm per second
+                velosity     = Calc::eucledianDist(p0, p1) / static_cast<double>(std::abs(t1-t0));
                 this->mLarvae[larvaIndex].parameters[t1].velosity = velosity;
             }
         }
@@ -449,7 +443,7 @@ void LarvaeContainer::recalculateLarvaVelocityAndAcceleration(size_t larvaIndex)
     this->recalculateLarvaAcceleration(larvaIndex);
 }
 
-void LarvaeContainer::recalculateLarvaAcceleration(size_t larvaIndex)
+void LarvaeContainer::recalculateLarvaAcceleration(const size_t larvaIndex)
 {
     double v0, v1;
     double acceleration;
@@ -459,12 +453,12 @@ void LarvaeContainer::recalculateLarvaAcceleration(size_t larvaIndex)
     {
         // there is no acceleration value for the first timestep
         this->mLarvae[larvaIndex].parameters[time.front()].acceleration = std::numeric_limits<double>::min();
-
+        
         for(int i = time.size()-1; i >= 1; --i)
         {
             int t0 = time.at(i-1);
             int t1 = time.at(i);
-
+            
             if(this->mLarvae.at(larvaIndex).getVelosityAt(t0, v0) && this->mLarvae.at(larvaIndex).getVelosityAt(t1, v1))
             {
                 acceleration = (v1 - v0) / static_cast<double>(std::abs(t1-t0));
@@ -501,7 +495,7 @@ void LarvaeContainer::calcLandmarkParameter(QString const& name, QPointF const& 
         }
     }
     
-    this->calcBearinAngle(name, p);
+    this->calcBearingAngle(name, p);
 }
 
 void LarvaeContainer::calcLandmarkParameter(QString const& name, QLineF const& l)
@@ -525,7 +519,7 @@ void LarvaeContainer::calcLandmarkParameter(QString const& name, QLineF const& l
         }
     }
     
-    this->calcBearinAngle(name, QPointF(l.p1().x() + l.dx()/2, l.p1().y() + l.dy()/2));
+    this->calcBearingAngle(name, l);
 }
 
 void LarvaeContainer::calcLandmarkParameter(const QString &name, const QRectF &r, const bool ellipse)
@@ -544,92 +538,104 @@ void LarvaeContainer::calcLandmarkParameter(const QString &name, const QRectF &r
             if(this->mLarvae.at(i).getMomentumAt(t, momentum))
             {
                 p = QtOpencvCore::point2qpoint(momentum);
-                if(!r.contains(p))
+                
+                if(!ellipse)
                 {
-                    dist = Calc::eucledianDist(p, r, ellipse); 
-                    this->mLarvae[i].parameters[t].distanceToLandmark[stdName] = dist;
-                    this->mLarvae[i].parameters[t].isInLandmark[stdName] = false;
+                    if(!r.contains(p))
+                    {
+                        dist = Calc::eucledianDist(p, r, ellipse); 
+                        this->mLarvae[i].parameters[t].distanceToLandmark[stdName] = dist;
+                        this->mLarvae[i].parameters[t].isInLandmark[stdName] = false;
+                    }
+                    else
+                    {
+                        this->mLarvae[i].parameters[t].distanceToLandmark[stdName] = 0.0;
+                        this->mLarvae[i].parameters[t].isInLandmark[stdName] = true;
+                    }
                 }
                 else
                 {
-                    this->mLarvae[i].parameters[t].distanceToLandmark[stdName] = 0.0;
-                    this->mLarvae[i].parameters[t].isInLandmark[stdName] = true;
+                    if(!Calc::isPointInEllipse(p, r))
+                    {
+                        dist = Calc::eucledianDist(p, r, ellipse); 
+                        this->mLarvae[i].parameters[t].distanceToLandmark[stdName] = dist;
+                        this->mLarvae[i].parameters[t].isInLandmark[stdName] = false;
+                    }
+                    else
+                    {
+                        this->mLarvae[i].parameters[t].distanceToLandmark[stdName] = 0.0;
+                        this->mLarvae[i].parameters[t].isInLandmark[stdName] = true;
+                    }
                 }
-                
             }
         }
     }
     
-    this->calcBearinAngle(name, r.center());
+    this->calcBearingAngle(name, r.center());
 }
 
-void LarvaeContainer::calcBearinAngle(const QString &name, const QPointF &landmarkPoint)
+void LarvaeContainer::calcBearingAngle(const QString &name, const QPointF &landmarkPoint)
 {
     std::vector<uint> timeSteps;
     std::string stdName = QtOpencvCore::qstr2str(name);
-    cv::Point momentum;
-    cv::Point cvLandmarkPoint;
-    double movementDirection;
-    double offset = 10.0;
-    double bearinAngle;
-    
-    cvLandmarkPoint.x = landmarkPoint.x();
-    cvLandmarkPoint.y = landmarkPoint.y();
-    
+    cv::Point momentum, tail;
     for(size_t i = 0; i < this->mLarvae.size(); ++i)
     {
-        //        qDebug() << "LarvaID: " << this->mLarvae.at(i).getID() << "\n";
         timeSteps = this->mLarvae.at(i).getAllTimeSteps();
-        foreach(uint t, timeSteps)
+        foreach(const uint t, timeSteps)
         {
-            if(this->mLarvae.at(i).getMomentumAt(t, momentum) && this->mLarvae.at(i).getMovementDirectionAt(t, movementDirection))
+            if(this->mLarvae.at(i).getMomentumAt(t, momentum) && this->mLarvae.at(i).getTailAt(t, tail))
             {
-                cv::Point pRotated;
-                movementDirection    = Calc::angleToRadian(movementDirection);
+                // convert to QPointF
+                QPointF M = QPointF(momentum.x, momentum.y);
+                QPointF T = QPointF(tail.x, tail.y);
                 
-                double sinVal   = std::sin(movementDirection);
-                double cosVal   = std::cos(movementDirection);
+                // vector from tail to momentum 
+                QPointF TM = M - T;
                 
-                /**
-                 * because the angles are calculeted relativly to the y-axis 
-                 * the meaning of the sin- and cos-values is switched. So if you look at the 
-                 * circle-table you have to be carefully and keep this fact in mind.
-                 */
-                if(cosVal > 0.0 && sinVal > 0.0)
-                {
-                    pRotated.x = momentum.x + (offset * sinVal);
-                    pRotated.y = momentum.y - (offset * cosVal);
-                }
-                else if(cosVal > 0.0 && sinVal < 0.0)
-                {
-                    pRotated.x = momentum.x + (offset * sinVal);
-                    pRotated.y = momentum.y - (offset * cosVal);
-                }
-                else if(cosVal < 0.0 && sinVal > 0.0)
-                {
-                    pRotated.x = momentum.x + (offset * sinVal);
-                    pRotated.y = momentum.y - (offset * cosVal);
-                }
-                else
-                {
-                    pRotated.x = momentum.x + (offset * sinVal);
-                    pRotated.y = momentum.y - (offset * cosVal);
-                }
+                // vector from tail to the closest point of larva tail point on the linesegment
+                QPointF TP = landmarkPoint - T;
                 
-                bearinAngle = Calc::calcSmallestAngle(momentum, pRotated, cvLandmarkPoint);
-                
-                //                QString debugString = QString("Time: %1,\t Momentum: [%2, %3],\t LandmarkPoint: [%4, %5],\t pRotated: [%6 %7],\t movementDirection(Radian): %8,\t bearinAngle: %9.")
-                //                        .arg(t).arg(momentum.x).arg(momentum.y).arg(cvLandmarkPoint.x).arg(cvLandmarkPoint.y).arg(pRotated.x).arg(pRotated.y).arg(movementDirection).arg(bearinAngle);
-                //                qDebug() << debugString;
-                
+                double bearinAngle = Calc::calcInnerAngleOfVectors(TM, TP);
                 this->mLarvae[i].parameters[t].bearinAngle[stdName] = bearinAngle;
             }
         }
-        //        qDebug() << "\n\n";
     }
 }
 
-bool LarvaeContainer::eraseLarvaAt(uint larvaID, uint time)
+void LarvaeContainer::calcBearingAngle(const QString& name, const QLineF& l)
+{
+    std::vector<uint> timeSteps;
+    std::string stdName = QtOpencvCore::qstr2str(name);
+    cv::Point spineMidPoint, tail;
+    for(size_t i = 0; i < this->mLarvae.size(); ++i)
+    {
+        timeSteps = this->mLarvae.at(i).getAllTimeSteps();
+        foreach(const uint t, timeSteps)
+        {
+            if(this->mLarvae.at(i).getSpineMidPointAt(t, spineMidPoint) && this->mLarvae.at(i).getTailAt(t, tail))
+            {
+                // convert to QPointF
+                QPointF M = QPointF(spineMidPoint.x, spineMidPoint.y);
+                QPointF T = QPointF(tail.x, tail.y);
+                
+                // vector from tail to midpoint 
+                QPointF TM = M - T;
+                
+                // closest point of larva tail point on the linesegment
+                QPointF pClosestPointToTail = Calc::getClosestPointOnLinesegment(T, l);
+                
+                // vector from tail to the closest point of larva tail point on the linesegment
+                QPointF TP = pClosestPointToTail - T;
+                
+                double bearinAngle = Calc::calcInnerAngleOfVectors(TM, TP);
+                this->mLarvae[i].parameters[t].bearinAngle[stdName] = bearinAngle;
+            }
+        }
+    }
+}
+
+bool LarvaeContainer::eraseLarvaAt(const uint larvaID, const uint time)
 {
     size_t larvaIndex;
     if(this->getIndexOfLarva(larvaID, larvaIndex))
@@ -642,7 +648,7 @@ bool LarvaeContainer::eraseLarvaAt(uint larvaID, uint time)
     return false;
 }
 
-bool LarvaeContainer::eraseLarva(uint larvaID)
+bool LarvaeContainer::eraseLarva(const uint larvaID)
 {
     size_t larvaIndex;
     if(this->getIndexOfLarva(larvaID, larvaIndex))
@@ -659,31 +665,43 @@ void LarvaeContainer::saveResultLarvae(const std::vector<std::string> &imgPaths,
                                        const RegionOfInterestContainer *ROIContainer, 
                                        const LandmarkContainer *landmarkContainer)
 {
-    QString saveAs = QFileDialog::getSaveFileName(NULL, QString("Save (modified) Larvae As..."), NULL, tr("YAML-File (*.yml)"));
+    QString saveAs = QFileDialog::getSaveFileName(nullptr, QString("Save (modified) Larvae As..."), QDir::currentPath(), tr("YAML-File (*.yml)"));
     if(!saveAs.isNull() && !saveAs.isEmpty())
     {
-        OutputGenerator::writeOutputLarva(saveAs.toStdString(), this->mLarvae, imgPaths, useUndist, ROIContainer, landmarkContainer);
+        OutputGenerator::writeYMLFile(saveAs.toStdString(), this->mLarvae, imgPaths, useUndist, ROIContainer, landmarkContainer);
     }
     
-    saveAs = QFileDialog::getSaveFileName(NULL, QString("Save (modified) Larvae As..."), NULL, tr("CSV-File (*.csv)"));
+    saveAs = QFileDialog::getSaveFileName(nullptr, QString("Save (modified) Larvae As..."), QDir::currentPath(), tr("CSV-File (*.csv)"));
     if(!saveAs.isNull() && !saveAs.isEmpty())
     {
-        OutputGenerator::writeLarvaeInverted(saveAs.toStdString(), this->mLarvae,imgPaths.size(), landmarkContainer);
+        OutputGenerator::writeCSVFile(saveAs.toStdString(), this->mLarvae,imgPaths.size(), landmarkContainer);
     }
     
-    saveAs = QFileDialog::getSaveFileName(NULL, QString("Save (modified) Larvae As..."), NULL, tr("TIF-File (*.tif)"));
+    saveAs = QFileDialog::getSaveFileName(nullptr, QString("Save (modified) Larvae As..."), QDir::currentPath(), tr("TIF-File (*.tif)"));
     if(!saveAs.isNull() && !saveAs.isEmpty())
     {
         OutputGenerator::saveResultImage(saveAs, img);
     }
 }
 
+void LarvaeContainer::processUntrackedLarvae(const uint timePoint)
+{
+    for(size_t i = 0; i < mLarvae.size(); ++i)
+    {
+        if(!this->isAssignedAt(mLarvae.at(i).getID(), timePoint))
+        {
+            mLarvae.at(i).contour.clear(); // last contour not needed anymore
+        }
+    }
+}
+
 QStringList LarvaeContainer::getAllLarvaeIDs() const
 {
     QStringList ids;
-    for(Larva const& l : this->mLarvae)
+    foreach(auto& l, this->mLarvae)
     {
-        ids << QString::number(l.getID());
+        QString id = QString("%1 -> [%2 %3]").arg(QString::number(l.getID())).arg(QString::number(l.getAllTimeSteps().front())).arg(QString::number(l.getAllTimeSteps().back()));
+        ids << id;
     }
     
     return ids;
@@ -699,7 +717,20 @@ bool LarvaeContainer::getLarva(const uint index, Larva &l)
     return false;
 }
 
-std::vector<uint> LarvaeContainer::getAllTimesteps(uint larvaID)
+bool LarvaeContainer::getLarvaByID(uint larvaID, Larva& l)
+{
+    for(size_t i = 0; i < this->mLarvae.size(); ++i)
+    {
+        if(this->mLarvae.at(i).getID() == larvaID)
+        {
+            l = this->mLarvae.at(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<uint> LarvaeContainer::getAllTimesteps(const uint larvaID)
 {
     size_t index;
     if(this->getIndexOfLarva(larvaID, index))
@@ -710,22 +741,18 @@ std::vector<uint> LarvaeContainer::getAllTimesteps(uint larvaID)
     return std::vector<uint>();
 }
 
-QVector<double> LarvaeContainer::getAllTimestepsForPlotting(uint larvaID)
+QVector<double> LarvaeContainer::getAllTimestepsForPlotting(const uint larvaID)
 {
     QVector<double> res;
-    size_t index;
-    if(this->getIndexOfLarva(larvaID, index))
+    for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
     {
-        for(uint t : this->mLarvae.at(index).getAllTimeSteps())
-        {
-            res << static_cast<double>(t+1);
-        }
+        res << static_cast<double>(t+1);
     }
     
     return res;
 }
 
-QVector<QVector<double> > LarvaeContainer::getAllTimestepGaps(uint larvaID)
+QVector<QVector<double> > LarvaeContainer::getAllTimestepGaps(const uint larvaID)
 {
     QVector<double> allTimeSteps = this->getAllTimestepsForPlotting(larvaID);
     QVector<QVector<double> > res;
@@ -749,7 +776,7 @@ QVector<QVector<double> > LarvaeContainer::getAllTimestepGaps(uint larvaID)
     return res;
 }
 
-QPair<int, int> LarvaeContainer::getStartEndTimesteps(uint larvaID)
+QPair<int, int> LarvaeContainer::getStartEndTimesteps(const uint larvaID)
 {
     QPair<int, int> res;
     size_t index;
@@ -762,7 +789,7 @@ QPair<int, int> LarvaeContainer::getStartEndTimesteps(uint larvaID)
     return res;
 }
 
-std::vector<int> LarvaeContainer::getAllValidLarvaeIDS(uint timePoint)
+std::vector<int> LarvaeContainer::getAllValidLarvaeIDS(const uint timePoint)
 {
     std::vector<int> res;
     for(size_t i = 0; i < this->mLarvae.size(); ++i)
@@ -775,7 +802,44 @@ std::vector<int> LarvaeContainer::getAllValidLarvaeIDS(uint timePoint)
     return res;
 }
 
-bool LarvaeContainer::getSpineMidPointIndex(uint larvaID, uint& index) const
+bool LarvaeContainer::larvaHasPointInContour(const uint timePoint, const uint larvaID, const FIMTypes::contour_t &rawLarvaContour)
+{
+    size_t i;
+    bool retBool = false;
+    
+    if(this->getIndexOfLarva(larvaID, i))
+    {
+        FIMTypes::spine_t spine;
+        cv::Point momentum;
+        
+        if (this->getSpineAt(larvaID, timePoint-1, spine))
+        {
+            this->getMomentumAt(larvaID, timePoint-1, momentum);
+            int momInContour = cv::pointPolygonTest(rawLarvaContour, momentum, false);
+            // momentum in contour
+            if (momInContour > 0)
+            {
+                retBool = true;
+            }
+            else if(!retBool)
+            {
+                foreach(auto spinePoint, spine)
+                {
+                    int spinePointInContour = cv::pointPolygonTest(rawLarvaContour, spinePoint, false);
+                    if (spinePointInContour > 0)
+                    {
+                        retBool = true;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    return retBool;
+}
+
+bool LarvaeContainer::getSpineMidPointIndex(const uint larvaID, uint& index) const
 {
     size_t i;
     if(this->getIndexOfLarva(larvaID, i))
@@ -793,6 +857,17 @@ bool LarvaeContainer::getSpinePointAt(const uint larvaID, const uint timePoint, 
     if(this->getIndexOfLarva(larvaID, i))
     {
         return this->mLarvae.at(i).getSpinePointAt(timePoint, index, spinePoint);
+    }
+    
+    return false;
+}
+
+bool LarvaeContainer::getSpineAt(const uint larvaID, const uint timePoint, spine_t &spine) const
+{
+    size_t i;
+    if(this->getIndexOfLarva(larvaID, i))
+    {
+        return this->mLarvae.at(i).getSpineAt(timePoint, spine);
     }
     
     return false;
@@ -831,6 +906,17 @@ bool LarvaeContainer::getIsCoiledIndicatorAt(const uint larvaID, const uint time
     return false;
 }
 
+bool LarvaeContainer::getIsWellOrientedAt(const uint larvaID, const uint timePoint, bool &retIsWellOriented)
+{
+    size_t i;
+    if(this->getIndexOfLarva(larvaID, i))
+    {
+        return this->mLarvae.at(i).getIsWellOrientedAt(timePoint, retIsWellOriented);
+    }
+    
+    return false;
+}
+
 bool LarvaeContainer::getMomentumAt(const uint larvaID, const uint timePoint, cv::Point &retMomentum) const
 {
     size_t i;
@@ -839,60 +925,74 @@ bool LarvaeContainer::getMomentumAt(const uint larvaID, const uint timePoint, cv
         this->mLarvae.at(i).getMomentumAt(timePoint, retMomentum);
         return true;    
     }
-
+    
     return false;
 }
 
-QVector<cv::Point> LarvaeContainer::getAllMomentumValues(uint larvaID)
+bool LarvaeContainer::getAreaAt(const uint larvaID, const uint timePoint, double & retArea) const
+{
+    size_t i;
+    if(this->getIndexOfLarva(larvaID, i))
+    {
+        this->mLarvae.at(i).getAreaAt(timePoint, retArea);
+        return true;
+    }
+    
+    return false;
+}
+
+bool LarvaeContainer::getSpineLengthAt(const uint larvaID, const uint timePoint, double & retSpineLength) const
+{
+    size_t i;
+    if(this->getIndexOfLarva(larvaID, i))
+    {
+        this->mLarvae.at(i).getSpineLengthAt(timePoint, retSpineLength);
+        return true;
+    }
+    
+    return false;
+}
+
+QVector<cv::Point> LarvaeContainer::getAllMomentumValues(const uint larvaID)
 {
     QVector<cv::Point> res;
     size_t i;
     cv::Point val;
+    
     if(this->getIndexOfLarva(larvaID, i))
-    {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+    {        
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getMomentumAt(t, val))
             {
                 res << val;
             }
+            else
+            {
+                res << cv::Point(0,0);
+            }
         }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllAreaValues(uint larvaID)
+QVector<double> LarvaeContainer::getAllAreaValues(const uint larvaID)
 {
     QVector<double> res;
     size_t i;
     double val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getAreaAt(t, val))
             {
                 res << val;
             }
-        }
-    }
-    
-    return res;
-}
-
-QVector<double> LarvaeContainer::getAllMainBodybendingAngle(uint larvaID)
-{
-    QVector<double> res;
-    size_t i;
-    double val;
-    if(this->getIndexOfLarva(larvaID, i))
-    {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
-        {
-            if(this->mLarvae.at(i).getMainBodyBendingAngleAt(t, val))
+            else
             {
-                res << val;
+                res << 0.0;
             }
         }
     }
@@ -900,16 +1000,62 @@ QVector<double> LarvaeContainer::getAllMainBodybendingAngle(uint larvaID)
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllCoiledIndicator(uint larvaID)
+QVector<double> LarvaeContainer::getAllMainBodybendingAngle(const uint larvaID)
+{
+    QVector<double> res;
+    size_t i;
+    double val;
+    if(this->getIndexOfLarva(larvaID, i))
+    {
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
+        {
+            if(this->mLarvae.at(i).getMainBodyBendingAngleAt(t, val))
+            {
+                res << val;
+            }
+            else
+            {
+                res << 0.0;
+            }
+        }
+    }
+    
+    return res;
+}
+
+QVector<double> LarvaeContainer::getAllCoiledIndicator(const uint larvaID)
 {
     QVector<double> res;
     size_t i;
     bool val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getIsCoiledIndicatorAt(t, val))
+            {
+                res << static_cast<double>(val);
+            }
+            else
+            {
+                res << 0.0;
+            }
+        }
+    }
+    
+    return res;
+}
+
+QVector<double> LarvaeContainer::getAllIsWellOriented(const uint larvaID)
+{
+    QVector<double> res;
+    size_t i;
+    bool val;
+    if(this->getIndexOfLarva(larvaID, i))
+    {
+        foreach(uint t, this->mLarvae.at(i).getAllTimeSteps())
+        {
+            if(this->mLarvae.at(i).getIsWellOrientedAt(t, val))
             {
                 res << static_cast<double>(val);
             }
@@ -919,75 +1065,68 @@ QVector<double> LarvaeContainer::getAllCoiledIndicator(uint larvaID)
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllPerimeter(uint larvaID)
+QVector<double> LarvaeContainer::getAllPerimeter(const uint larvaID)
 {
     QVector<double> res;
     size_t i;
     double val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getPerimeterAt(t, val))
             {
                 res << val;
             }
+            else
+            {
+                res << 0.0;
+            }
         }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllDistanceToOrigin(uint larvaID)
+QVector<double> LarvaeContainer::getAllDistanceToOrigin(const uint larvaID)
 {
     QVector<double> res;
     size_t i;
     double val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getDistToOriginAt(t, val))
             {
                 res << val;
             }
+            else
+            {
+                res << 0.0;
+            }
         }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllMomentumDistance(uint larvaID)
+QVector<double> LarvaeContainer::getAllMomentumDistance(const uint larvaID)
 {
     QVector<double> res;
     size_t i;
     double val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getMomentumDistAt(t, val))
             {
                 res << val;
             }
-        }
-    }
-    
-    return res;
-}
-
-QVector<double> LarvaeContainer::getAllAccumulatedDistance(uint larvaID)
-{
-    QVector<double> res;
-    size_t i;
-    double val;
-    if(this->getIndexOfLarva(larvaID, i))
-    {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
-        {
-            if(this->mLarvae.at(i).getAccDistAt(t, val))
+            else
             {
-                res << val;
+                res << 0.0;
             }
         }
     }
@@ -995,331 +1134,206 @@ QVector<double> LarvaeContainer::getAllAccumulatedDistance(uint larvaID)
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllGoPhaseIndicator(uint larvaID)
+QVector<double> LarvaeContainer::getAllAccumulatedDistance(const uint larvaID)
+{
+    QVector<double> res;
+    size_t i;
+    double val;
+    if(this->getIndexOfLarva(larvaID, i))
+    {
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
+        {
+            if(this->mLarvae.at(i).getAccDistAt(t, val))
+            {
+                res << val;
+            }
+            else
+            {
+                res << 0.0;
+            }
+        }
+    }
+    
+    return res;
+}
+
+QVector<double> LarvaeContainer::getAllGoPhaseIndicator(const uint larvaID)
 {
     QVector<double> res;
     size_t i;
     int val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getGoPhaseIndicatorAt(t, val))
             {
                 res << static_cast<double>(val);
             }
+            else
+            {
+                res << 0.0;
+            }
         }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllLeftBendingIndicator(uint larvaID)
+QVector<double> LarvaeContainer::getAllLeftBendingIndicator(const uint larvaID)
 {
     QVector<double> res;
     size_t i;
     bool val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getLeftBendingIndicatorAt(t, val))
             {
                 res << static_cast<double>(val);
             }
+            else
+            {
+                res << 0.0;
+            }
         }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllRightBendingIndicator(uint larvaID)
+QVector<double> LarvaeContainer::getAllRightBendingIndicator(const uint larvaID)
 {
     QVector<double> res;
     size_t i;
     bool val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getRightBendingIndicatorAt(t, val))
             {
                 res << static_cast<double>(val);
             }
+            else
+            {
+                res << 0.0;
+            }
         }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllMovementDirection(uint larvaID)
+QVector<double> LarvaeContainer::getAllMovementDirection(const uint larvaID)
 {
     QVector<double> res;
     size_t i;
     double val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getMovementDirectionAt(t, val))
             {
                 res << val;
             }
+            else
+            {
+                res << 0.0;
+            }
         }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllDistancesToLandmark(uint larvaID, const QString &landmarkID)
+QVector<double> LarvaeContainer::getAllDistancesToLandmark(const uint larvaID, const QString &landmarkID)
 {
     QVector<double> res;
     size_t i;
     double val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getDistanceToLandmark(t, landmarkID.toStdString(), val))
             {
                 res << val;
             }
+            else
+            {
+                res << 0.0;
+            }
         }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getAllBearingAnglesToLandmark(uint larvaID, const QString &landmarkID)
+QVector<double> LarvaeContainer::getAllBearingAnglesToLandmark(const uint larvaID, const QString &landmarkID)
 {
     QVector<double> res;
     size_t i;
     double val;
     if(this->getIndexOfLarva(larvaID, i))
     {
-        for(uint t : this->mLarvae.at(i).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(i).getBearingAngleToLandmark(t, landmarkID.toStdString(), val))
             {
                 res << val;
             }
+            else
+            {
+                res << 0.0;
+            }
         }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getVelocity(uint larvaID)
-{
-    QVector<double> x;
-    QVector<double> y;
-    
-    QVector<double> xReal;
-    QVector<double> yReal;
-    
+QVector<double> LarvaeContainer::getVelocity(const uint larvaID)
+{   
     QVector<double> res;
     size_t larvaIndex;
     double val;
     if(this->getIndexOfLarva(larvaID, larvaIndex))
-    {
-        
-        /*
-        std::vector<uint> time = this->mLarvae.at(larvaIndex).getAllTimeSteps();
-        
-        for(uint t : time)
-        {
-            if(this->mLarvae.at(larvaIndex).getMomentumDistAt(t, val))
-            {
-                xReal << static_cast<double>(t);
-                yReal << val;
-            }
-        }
-        
-        for(int i = 0; i < time.size(); i += CameraParameter::dFPS)
-        {
-            uint t = time.at(i);
-            if(this->mLarvae.at(larvaIndex).getMomentumDistAt(t, val))
-            {
-                x << static_cast<double>(t);
-                y << val;
-            }
-        }
-        int n = x.size()-1;
-        
-        QVector<double> a = y;
-        QVector<double> b = QVector<double>(n, 0.0);
-        QVector<double> c;
-        QVector<double> d = QVector<double>(n, 0.0);
-        QVector<double> h;
-        QVector<double> e = QVector<double>(n, 0.0);;
-        QVector<double> matrixA, matrixB, matrixC, matrixD;
-        
-        for(int k = 0; k <= n-1; ++k)
-            h << (x[k+1] - x[k]);
-            
-        for(int k = 1; k <= n-1; ++k)
-            e[k] = 3*((a[k+1]-a[k])/h[k] - (a[k]-a[k-1])/h[k-1]); 
-            
-        matrixA << 0.0;
-        for(int k = 1; k < n-1; ++k)
-            matrixA << h[k];
-            
-        for(int i = 0; i < n-1; ++i)
-            matrixB << (2*(h[i]+h[i+1]));
-            
-        for(int i = 1; i < n-1; ++i)
-            matrixC << h[i];
-        matrixC << 0.0;
-        
-        for(int i = 0; i < n-1; ++i)
-            matrixD << ( 3*(a[i+2]-a[i+1])/h[i+1] - 3*(a[i+1]-a[i])/h[i] );
-            
-        matrixC[0] /= matrixB[0];
-        matrixD[0] /= matrixB[0];
-        
-        for(int i = 1; i < n-1; ++i)
-        {
-            matrixC[i] = (matrixC[i] / (matrixB[i]-matrixA[i]*matrixC[i-1]));
-            matrixD[i] = ((matrixD[i] - matrixA[i]*matrixD[i-1])/(matrixB[i]-matrixA[i]*matrixC[i-1]));
-        }
-        
-        matrixD[n-1] = ((matrixD[n-1] - matrixA[n-1]*matrixD[n-1-1])/(matrixB[n-1]-matrixA[n-1]*matrixC[n-1-1]));
-        
-
-        
-        QVector<double> c = QVector<double>(n+1, 0.0);
-        QVector<double> l = QVector<double>(n+1, 0.0);
-        QVector<double> mu = QVector<double>(n+1, 0.0);
-        QVector<double> z = QVector<double>(n+1, 0.0);
-        
-        l[0] = 1.0;
-        mu[0] = z[0] = 0.0;
-        
-        for(int i = 1; i < n; ++i)
-        {
-            l[i]    = (2*(x[i+1]-x[i-1])) - (h[i-1]*mu[i-1]);
-            mu[i]   = h[i] / l[i];
-            z[i]    = (r[i] - (h[i-1]*z[i-1]))/l[i];
-        }
-        
-        l[n] = 1.0;
-        z[n] = c[n] = 0.0;
-        
-        for(int j = n-1; j >= 0; --j)
-        {
-            c[j] = z[j] - (mu[j]*c[j+1]);
-            b[j] = ((a[j+1]-a[j])/h[j]) - ((h[j]*(c[j+1]+(2*c[j])))/3);
-            d[j] = (c[j+1] - c[j]) / (3*h[j]);
-        }
-
-        QVector<SplineSet> outputSet;
-        for(int i = 0; i < n; ++i)
-        {
-            SplineSet spSet;
-            spSet.a = a[i];
-            spSet.b = b[i];
-            spSet.c = c[i];
-            spSet.d = d[i];
-            spSet.x = x[i];
-            
-            for(int j = i*CameraParameter::dFPS; j < i*CameraParameter::dFPS + CameraParameter::dFPS; ++j)
-            {
-                double velosity         = spSet.b + 2*spSet.c*(xReal[j] - spSet.x) + 3*spSet.d*(xReal[j] - spSet.x);
-                double acceleration     = 2*spSet.c + 6*spSet.d*(xReal[j] - spSet.x);
-                
-                QString debugString = QString("Time: %1,\t Accumulated Distance: %2,\t Velosity: %3,\t Acceleration: %4")
-                        .arg(xReal[j]).arg(yReal[j]).arg(velosity).arg(acceleration);
-                        
-                qDebug() << debugString;
-                
-                res << velosity;
-            }
-            
-            
-            //            qDebug() << debugString;
-            
-            //            outputSet << spSet;
-            
-            //            res << spSet.b;
-        }*/
-        
-        for(uint t : this->mLarvae.at(larvaIndex).getAllTimeSteps())
+    {        
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(larvaIndex).getVelosityAt(t, val))
             {
                 res << val;
             }
-        }
-        
-        
-        
-        /*
-        QVector<QVector<double> > timeGaps = this->getAllTimestepGaps(larvaID);
-        
-        for(QVector<double> const& time : timeGaps)
-        {
-            if(time.size() <= frameWindowSize)
-            {
-                for(int t = 0; t < time.size(); ++i)
-                    res << 0.0;
-            }
             else
             {
-
-                // Forwardpass
-                for(int t = 0; t < time.size() - frameWindowSize; ++t)
-                {
-                    int t0 = time.at(t);
-                    int t1 = time.at(t+frameWindowSize);
-                    
-                    double s0;
-                    double s1;
-                    
-                    if(this->mLarvae.at(i).getAccDistAt(t0, s0) && this->mLarvae.at(i).getAccDistAt(t1, s1))
-                    {
-                        val = (s1 - s0) / (static_cast<double>(t1) - static_cast<double>(t0));
-                        val *= CameraParameter::dScaleFactor; // cm per second
-                        val *= 10.0; // mm per second
-                        res << val;
-                    }
-                }
-                
-                // Backwardpass
-                for(int t = time.size()-1; t >= frameWindowSize; --t)
-                {
-                    int t0 = time.at(t);
-                    int t1 = time.at(t-frameWindowSize);
-                    
-                    double s0;
-                    double s1;
-                    
-                    if(this->mLarvae.at(i).getAccDistAt(t0, s0) && this->mLarvae.at(i).getAccDistAt(t1, s1))
-                    {
-                        val = (s1 - s0) / (static_cast<double>(t1) - static_cast<double>(t0));
-                        val *= CameraParameter::dScaleFactor; // cm per second
-                        val *= 10.0; // mm per second
-                        res << val;
-                    }
-                }
+                res << 0.0;
             }
-        }*/
+        }
     }
     
     return res;
 }
 
-QVector<double> LarvaeContainer::getAcceleration(uint larvaID)
+QVector<double> LarvaeContainer::getAcceleration(const uint larvaID)
 {
     QVector<double> res;
     size_t larvaIndex;
     double val;
     if(this->getIndexOfLarva(larvaID, larvaIndex))
     {
-        for(uint t : this->mLarvae.at(larvaIndex).getAllTimeSteps())
+        for(int t = 0; t < this->mMaximumNumberOfTimePoints; ++t)
         {
             if(this->mLarvae.at(larvaIndex).getAccelerationAt(t, val))
             {
                 res << val;
+            }
+            else
+            {
+                res << 0.0;
             }
         }
     }
@@ -1360,9 +1374,9 @@ void LarvaeContainer::updateLarvaValues(TrackerSceneLarva const* tLarva)
     }
 }
 
-spineType LarvaeContainer::calcSpine(QPainterPath const& spinePath)
+FIMTypes::spine_t LarvaeContainer::calcSpine(QPainterPath const& spinePath)
 {
-    spineType spine;
+    FIMTypes::spine_t spine;
     QPainterPath::Element e;
     
     for(int i = 0; i < spinePath.elementCount(); ++i) 
@@ -1374,12 +1388,12 @@ spineType LarvaeContainer::calcSpine(QPainterPath const& spinePath)
     return spine;
 }
 
-void LarvaeContainer::updateLarvaSpine(int index, 
-                                       uint time, 
+void LarvaeContainer::updateLarvaSpine(const int index, 
+                                       const uint time, 
                                        QPainterPath const& paintSpine, 
                                        std::vector<double> const& radii)
 {
-    spineType spine                                                         = this->calcSpine(paintSpine);
+    FIMTypes::spine_t spine                                                         = this->calcSpine(paintSpine);
     double spineLength                                                      = Calc::calcSpineLength(spine);
     double mainBodyBendingAngle                                             = Calc::calcAngle(spine.at((spine.size() - 1) / 2), 
                                                                                               spine.at(0), 
@@ -1390,8 +1404,8 @@ void LarvaeContainer::updateLarvaSpine(int index,
     this->mLarvae[index].parameters[time].spineRadii                  = radii;
 }
 
-void LarvaeContainer::updateLarvaMomentum(int index, 
-                                          uint time, 
+void LarvaeContainer::updateLarvaMomentum(const int index, 
+                                          const uint time, 
                                           QPolygonF const& paintPolygon)
 {
     cv::Point consecutiveMomentum;
@@ -1406,23 +1420,23 @@ void LarvaeContainer::updateLarvaMomentum(int index,
     this->mLarvae[index].parameters[time].momentumDist    = momentumDist;
 }
 
-void LarvaeContainer::updateLarvaArea(int index, 
-                                      uint time, 
+void LarvaeContainer::updateLarvaArea(const int index, 
+                                      const uint time, 
                                       QPolygonF const& paintPolygon)
 {
     double area                                         = Calc::calcPolygonArea(paintPolygon);
     this->mLarvae[index].parameters[time].area    = area;
 }
 
-void LarvaeContainer::updateLarvaPerimeter(int index, 
-                                           uint time, 
+void LarvaeContainer::updateLarvaPerimeter(const int index, 
+                                           const uint time, 
                                            QPolygonF const& paintPolygon)
 {
     double perimeter                                        = Calc::calcPerimeter(paintPolygon);
     this->mLarvae[index].parameters[time].perimeter   = perimeter;
 }
 
-void LarvaeContainer::updateLarvaDistance2Origin(int index)
+void LarvaeContainer::updateLarvaDistance2Origin(const int index)
 {
     cv::Point momentum;
     double distToOrigin = 0.0;
@@ -1438,7 +1452,7 @@ void LarvaeContainer::updateLarvaDistance2Origin(int index)
     }
 }
 
-void LarvaeContainer::updateLarvaAccumulatedDistance(int index)
+void LarvaeContainer::updateLarvaAccumulatedDistance(const int index)
 {
     cv::Point p1, p2;
     double accDist = 0.0;
@@ -1454,7 +1468,7 @@ void LarvaeContainer::updateLarvaAccumulatedDistance(int index)
     
 }
 
-void LarvaeContainer::updateIsCoiledIndicator(int index, uint time)
+void LarvaeContainer::updateIsCoiledIndicator(const int index, const uint time)
 {
     double perimeter;
     double spineLength;
@@ -1463,8 +1477,6 @@ void LarvaeContainer::updateIsCoiledIndicator(int index, uint time)
     uint midPointIndex;
     double midPointRadius;
     double midCirclePeri2PeriRatio;
-    
-    int nPoints;
     
     std::vector<double> radii;
     
@@ -1476,9 +1488,7 @@ void LarvaeContainer::updateIsCoiledIndicator(int index, uint time)
         double midCirclePeri2PeriThresh = 0.5;
         
         if(!LarvaeExtractionParameters::bUseDefault)
-        {
-            nPoints = LarvaeExtractionParameters::iNumerOfSpinePoints;
-            
+        {            
             peri2spineLengthThresh = LarvaeExtractionParameters::CoiledRecognitionParameters::dPerimeterToSpinelenghtThreshold;
             midCirclePeri2PeriThresh = LarvaeExtractionParameters::CoiledRecognitionParameters::dMidcirclePerimeterToPerimeterThreshold;
             
@@ -1505,7 +1515,7 @@ void LarvaeContainer::updateIsCoiledIndicator(int index, uint time)
     }
 }
 
-void LarvaeContainer::updateGoPhaseIndicator(int index, uint time)
+void LarvaeContainer::updateGoPhaseIndicator(const int index, const uint time)
 {
     // body bending must be +/- 30 degree deviation from 180 degree
     int angleThresh = 30;
@@ -1552,7 +1562,7 @@ void LarvaeContainer::updateGoPhaseIndicator(int index, uint time)
     this->mLarvae[index].parameters[time].goPhase =  phaseIndicator;
 }
 
-void LarvaeContainer::updateTurnIndicator(int index, uint time)
+void LarvaeContainer::updateTurnIndicator(const int index, const uint time)
 {
     int bendingAngleThresh = 30;
     double mainBodyBendingAngle;
@@ -1578,7 +1588,7 @@ bool LarvaeContainer::calcRightTurnIndicator(const double curBending, const uint
     return (curBending < (180-bendingThresh));
 }
 
-void LarvaeContainer::updateMovementDirection(int index, uint time)
+void LarvaeContainer::updateMovementDirection(const int index, const uint time)
 {
     int framesForMovementDirectionCalc = static_cast<int>(CameraParameter::dFPS);
     if(!LarvaeExtractionParameters::MovementDirectionParameters::bUseDynamicMovementDirectionParameterCalculation)
@@ -1603,7 +1613,7 @@ void LarvaeContainer::updateMovementDirection(int index, uint time)
     this->mLarvae[index].parameters[time].movementDirection = movementDirection;
 }
 
-bool LarvaeContainer::getIndexOfLarva(uint id, size_t& index) const
+bool LarvaeContainer::getIndexOfLarva(const uint id, size_t& index) const
 {
     for(unsigned int i = 0; i < this->mLarvae.size(); ++i)
     {
@@ -1616,14 +1626,14 @@ bool LarvaeContainer::getIndexOfLarva(uint id, size_t& index) const
     return false;
 }
 
-void LarvaeContainer::insertRawLarva(uint larvaID, 
-                                     uint timePoint, 
+void LarvaeContainer::insertRawLarva(const uint larvaID, 
+                                     const uint timePoint, 
                                      const RawLarva &rawLarva)
 {
     size_t larvaIndex;
     if(this->getIndexOfLarva(larvaID, larvaIndex))
     {
-        spineType spine;
+        FIMTypes::spine_t spine;
         spine.reserve(rawLarva.getDiscreteSpine().size());
         
         std::vector<double> radii;
@@ -1646,7 +1656,9 @@ void LarvaeContainer::insertRawLarva(uint larvaID,
         this->mMaxSpineLength                           = std::max(this->mLarvae[larvaIndex].values.spineLength, this->mMaxSpineLength);
         this->mLarvae[larvaIndex].values.perimeter      = rawLarva.getContourPerimeter();
         
-        this->mLarvae[larvaIndex]. values.isCoiled      = rawLarva.getIsCoiledIndicator();
+        this->mLarvae[larvaIndex].values.isCoiled       = rawLarva.getIsCoiledIndicator();
+        
+        this->mLarvae[larvaIndex].values.isWellOriented = false; // set false by default
         
         this->mLarvae[larvaIndex].values.distToOrigin   = calcDistToOrigin(larvaIndex, rawLarva.getMomentum());
         
@@ -1702,10 +1714,12 @@ void LarvaeContainer::insertRawLarva(uint larvaID,
         this->recalculateLarvaVelocityAndAcceleration(larvaIndex);
         
         this->mLarvae[larvaIndex].parameters.insert(std::pair<unsigned int, Larva::ValuesType>(timePoint, this->mLarvae[larvaIndex].values));
+        
+        this->mLarvae[larvaIndex].contour = rawLarva.getContour();
     }
 }
 
-bool LarvaeContainer::isAssignedAt(uint larvaID, uint timePoint) const
+bool LarvaeContainer::isAssignedAt(const uint larvaID, const uint timePoint) const
 {
     size_t index;
     if(this->getIndexOfLarva(larvaID, index))
@@ -1722,55 +1736,70 @@ void LarvaeContainer::interplolateLarvae()
 {
     // change Head-Tail position if it is not consistent over time
     this->interpolateHeadTailOverTime();
+    
     // fill sampling gaps caused by time windows (e.g. 10 fps are oversampled for movement direction etc.)
     this->fillTimeSamplingGaps();
+    
+    // reacalculate some parameters after head tail interpolation bacause in some frames
+    // head and tail markers can be swapped so some features like velocity etc. have 
+    // to be recalculated
+    this->updateLarvaParameterAfterHeadTailInterpolation();
 }
 
-void LarvaeContainer::interpolateHeadTailOverTime(uint larvaIndex)
+void LarvaeContainer::interpolateHeadTailOverTime(const uint larvaIndex)
 {
-    int changeDirectionalityCounter = 0;
-    for (std::map<unsigned int, Larva::ValuesType>::iterator it = this->mLarvae[larvaIndex].parameters.begin(); it != this->mLarvae[larvaIndex].parameters.end(); ++it)
-    {
-        double movementDirection;
-        if (this->mLarvae.at(larvaIndex).getMovementDirectionAt(it->first,movementDirection))
-        {
-            cv::Point head = it->second.spine.at(0);
-            cv::Point tail = it->second.spine.at(this->mLarvae[larvaIndex].getNSpinePoints()-1);
-            double angleMainBodyDirectionality = Calc::calcAngleToYAxes(tail,head);
-            
-            double angleDiff = Calc::calcAngleDiff(movementDirection,angleMainBodyDirectionality);
-            
-            if (angleDiff > 50)
-            {
-                ++changeDirectionalityCounter;
-            }
-            
-        }
-    }
+    // search for sufficiently long sequences, where larva has not been coiled
+    uint minSeqSize = 10; // PARAMS
+    uint from = 0;
+    uint to = 0;
     
-    if (changeDirectionalityCounter >= static_cast<int>(this->mLarvae.at(larvaIndex).parameters.size() / 2))
+    for (std::map<unsigned int, Larva::ValuesType>::iterator it = mLarvae[larvaIndex].parameters.begin(); it != mLarvae[larvaIndex].parameters.end(); ++it)
     {
-        for (std::map<unsigned int, Larva::ValuesType>::iterator it = this->mLarvae[larvaIndex].parameters.begin(); it != this->mLarvae[larvaIndex].parameters.end(); ++it)
+        if(!it->second.isCoiled)
         {
-            it->second.spine        = this->reverseVec(it->second.spine);
-            it->second.spineRadii   = this->reverseVec(it->second.spineRadii);
+            from = it->first;
+            to = from;
             
-            it->second.mainBodyBendingAngle = Calc::calcAngle(it->second.spine.at((this->mLarvae[larvaIndex].getNSpinePoints()-1)/2),
-                                                              it->second.spine.at(0),
-                                                              it->second.spine.at(this->mLarvae[larvaIndex].getNSpinePoints()-1));
-            
-            //it->second.movementDirection = Calc::calcCircularAngleSum(it->second.movementDirection,180);
-            
-            if (it->second.isLeftBended)
+            std::map<uint, Larva::ValuesType>::iterator goOnIt = it;
+            goOnIt++;
+            while(goOnIt != mLarvae[larvaIndex].parameters.end())
             {
-                it->second.isLeftBended = false;
-                it->second.isRightBended = true;
+                if(goOnIt->first == to + 1 && !goOnIt->second.isCoiled)
+                {
+                    to = goOnIt->first;
+                    goOnIt++;
+                }
+                else
+                {
+                    break;
+                }
             }
-            else if (it->second.isRightBended)
+            
+            goOnIt--;
+            
+            // if sequence sufficiently long, check head-tail-recognition
+            if(to-from+1 > minSeqSize)
             {
-                it->second.isRightBended = false;
-                it->second.isLeftBended = true;
+                int indicator = this->calcHeadTailRecognitionIndicator1(larvaIndex, from, to);
+                
+                if(indicator != 0)
+                {
+                    for(uint i = from; i <= to; it++, i++)
+                    {
+                        it->second.isWellOriented = true; // if indicator != 0, the sequence is valid
+                        if(indicator == -1)
+                        { // change orientation if indicated
+                            it->second.spine        = this->reverseVec(it->second.spine);
+                            it->second.spineRadii   = this->reverseVec(it->second.spineRadii);
+                            it->second.mainBodyBendingAngle = Calc::calcAngle(it->second.spine.at((this->mLarvae[larvaIndex].getNSpinePoints()-1)/2),
+                                                                              it->second.spine.at(0),
+                                                                              it->second.spine.at(this->mLarvae[larvaIndex].getNSpinePoints()-1));
+                            std::swap(it->second.isLeftBended,it->second.isRightBended);
+                        }
+                    }
+                }
             }
+            it = goOnIt;
         }
     }
 }
@@ -1783,7 +1812,7 @@ void LarvaeContainer::interpolateHeadTailOverTime()
     }
 }
 
-void LarvaeContainer::fillTimeSamplingGaps(uint larvaIndex)
+void LarvaeContainer::fillTimeSamplingGaps(const uint larvaIndex)
 {
     // Get Stop And Go Parameteres:
     // body bending must be +/- 30 degree deviation from 180 degree
@@ -1874,7 +1903,25 @@ void LarvaeContainer::fillTimeSamplingGaps()
     }
 }
 
-double LarvaeContainer::calcMomentumDist(uint larvaIndex, uint timePoint, const cv::Point &curMomentum) const
+void LarvaeContainer::updateLarvaParameterAfterHeadTailInterpolation()
+{
+    for(size_t i = 0; i < this->mLarvae.size(); ++i)
+    {
+        this->recalculateLarvaDistanceParameter(mLarvae.at(i).getID());
+        this->recalculateLarvaVelocityAndAcceleration(i);
+        this->updateLarvaAccumulatedDistance(i);
+        this->updateLarvaDistance2Origin(i);
+        std::vector<uint> time = mLarvae.at(i).getAllTimeSteps();
+        foreach (uint t, time) {
+            this->updateGoPhaseIndicator(i, t);
+            this->updateIsCoiledIndicator(i, t);
+            this->updateMovementDirection(i, t);
+            this->updateTurnIndicator(i, t);
+        }
+    }
+}
+
+double LarvaeContainer::calcMomentumDist(const uint larvaIndex, const uint timePoint, const cv::Point &curMomentum) const
 {
     cv::Point consecutiveMomentum;
     double dist = 0;
@@ -1887,9 +1934,9 @@ double LarvaeContainer::calcMomentumDist(uint larvaIndex, uint timePoint, const 
     return dist;
 }
 
-void LarvaeContainer::changeDirection(uint larvaIndex, uint timePoint)
+void LarvaeContainer::changeDirection(const uint larvaIndex, const uint timePoint)
 {
-    spineType spine;
+    FIMTypes::spine_t spine;
     if(this->mLarvae.at(larvaIndex).getSpineAt(timePoint, spine))
     {
         // spinesize muss be an odd number
@@ -1913,17 +1960,17 @@ void LarvaeContainer::changeDirection(uint larvaIndex, uint timePoint)
     }
 }
 
-void LarvaeContainer::eraseAt(uint larvaIndex, uint timePoint)
+void LarvaeContainer::eraseAt(const uint larvaIndex, const uint timePoint)
 {
     this->mLarvae[larvaIndex].parameters.erase(timePoint);
 }
 
-double LarvaeContainer::calcDistToOrigin(uint larvaIndex, const cv::Point &curMomentum) const
+double LarvaeContainer::calcDistToOrigin(const uint larvaIndex, const cv::Point &curMomentum) const
 {
     return Calc::eucledianDist(this->mLarvae.at(larvaIndex).getOrigin(), curMomentum);
 }
 
-int LarvaeContainer::calcGoPhaseIndicator(uint larvaIndex, 
+int LarvaeContainer::calcGoPhaseIndicator(const uint larvaIndex, 
                                           const uint timePoint, 
                                           const cv::Point &curMomentum, 
                                           const double curBending, 
@@ -1952,7 +1999,7 @@ int LarvaeContainer::calcGoPhaseIndicator(uint larvaIndex,
     return phaseIndicator;
 }
 
-double LarvaeContainer::calcMovementDirection(uint larvaIndex, 
+double LarvaeContainer::calcMovementDirection(const uint larvaIndex, 
                                               const uint timePoint, 
                                               const uint timeWindow, 
                                               const cv::Point &curMomentum)
@@ -1972,10 +2019,164 @@ double LarvaeContainer::calcMovementDirection(uint larvaIndex,
     return movementDirection;
 }
 
-bool LarvaeContainer::changeDirectionality(uint larvaIndex, uint timePoint, const RawLarva &rawlarva)
+int LarvaeContainer::calcHeadTailRecognitionIndicator1(const uint larvaIndex, const uint from, const uint to)
 {
-    spineType previousSpine;
-    spineType curSpine = rawlarva.getDiscreteSpine();
+    uint timeWindow = static_cast<uint>(CameraParameter::dFPS); // PARAMS
+    uint numValues = to-from+1;
+    
+    /* First approach: Search for a period where the body bending angle
+      is less than a specified threshold (close to 180 degree) and with
+      movement of the larva
+    */
+    std::vector<double> bendingAngles;
+    bendingAngles.reserve(numValues);
+    
+    double maxBendingAngleThresh = 30; // PARAMS, indicates how much angle can differ from 180 degree
+    double fractionOfSpineLengthForMovement = 0.07; // PARAMS
+    double movementToOrientationAngleThresh = 50; // PARAMS
+    uint counter = 0;
+    for(uint i = from; i <= to; i++){
+        
+        double angleDiff = std::abs(180 - mLarvae[larvaIndex].parameters[i].mainBodyBendingAngle);
+        bendingAngles.push_back(angleDiff);
+        
+        if(angleDiff <= maxBendingAngleThresh)
+        {
+            counter++;
+            if(counter >= timeWindow)
+            {
+                // now, check if there was a significant movement
+                cv::Point mom1 = mLarvae[larvaIndex].parameters[i-counter+1].momentum;
+                cv::Point mom2 = mLarvae[larvaIndex].parameters[i].momentum;
+                cv::Point2f movDir = mom2 - mom1;
+                
+                // movement must be wide enough and wider than change of spinelengths (think of pulling in the head)
+                float movLength = Calc::normL2<float>(movDir);
+                double spineLength1 = mLarvae[larvaIndex].parameters[i-counter+1].spineLength;
+                double spineLength2 = mLarvae[larvaIndex].parameters[i].spineLength;
+                double spineLengthChange = spineLength1-spineLength2; // if longer, its negative, so not considered in if condition
+                if(movLength > std::max(1.5*spineLengthChange, fractionOfSpineLengthForMovement * spineLength1))
+                {
+                    double spineSize = mLarvae[larvaIndex].parameters[i].spine.size();
+                    cv::Point head = mLarvae[larvaIndex].parameters[i].spine.at(0);
+                    cv::Point tail = mLarvae[larvaIndex].parameters[i].spine.at(spineSize-1);
+                    cv::Point2f orientation = head-tail;
+                    double angle = Calc::calcAngle(orientation, movDir);
+                    assert(angle <= 180.0);
+                    if(angle < movementToOrientationAngleThresh)
+                    {
+                        return 1; // angle small enough, so head-tail orientation can be verified true
+                    }
+                    else if(angle > 180-movementToOrientationAngleThresh)
+                    {
+                        return -1; // angle high enough, so head-tail orientation need to be changed
+                    }
+                }
+                counter = 1; // angle/movLength not informative enough, go on
+                continue;
+            }
+        }
+        else
+        {
+            counter = 0;
+        }
+    }
+    
+    /* Second approach: Search for a period where the body bending angle
+      changed significantly (from unbended to bended, otherwise it could also
+      be the tail which is being pulled in). The change must be due to a head
+      movement, so the endpoint with a wider movement must be the head.
+    */
+    
+    double bendingAngleChangeThresh = 40; // PARAMS
+    uint stepWidth = 1; // PARAMS
+    for(uint i = from; i+stepWidth <= to; i++)
+    {
+        double bendingAngle1 = bendingAngles.at(i-from);
+        double spineLength1 = mLarvae[larvaIndex].parameters[i].spineLength;
+        for(uint j = i+stepWidth; j < std::min(i+timeWindow,to); j = j+stepWidth)
+        {
+            double bendingAngle2 = bendingAngles.at(j-from);
+            // bendingAngle got considerably bigger?
+            if(bendingAngle2-bendingAngle1 > bendingAngleChangeThresh)
+            {
+                double spineSize = mLarvae[larvaIndex].parameters[i].spine.size();
+                cv::Point2f head1 = mLarvae[larvaIndex].parameters[i].spine.at(0);
+                cv::Point2f tail1 = mLarvae[larvaIndex].parameters[i].spine.at(spineSize-1);
+                cv::Point2f head2 = mLarvae[larvaIndex].parameters[j].spine.at(0);
+                cv::Point2f tail2 = mLarvae[larvaIndex].parameters[j].spine.at(spineSize-1);
+                
+                // calc movement of both endpoints
+                float headMov = Calc::normL2<float>(head1-head2);
+                float tailMov = Calc::normL2<float>(tail1-tail2);
+                
+                // check, if one of the endpoints moved significantly more (at least twice as much)
+                // and if movement is not only due to a reduction of spineLength
+                if(std::max(headMov,tailMov) > 2*std::min(headMov,tailMov)
+                        && std::max(headMov,tailMov) > fractionOfSpineLengthForMovement*spineLength1)
+                {
+                    if(headMov > tailMov)
+                    {
+                        return 1; // head moved more, so its really the head
+                    }
+                    else
+                    {
+                        return -1; // tail moved more, so change orientation
+                    }
+                }
+            }
+        }
+    }
+    
+    return 0; // could not verify orientation
+}
+
+int LarvaeContainer::calcHeadTailRecognitionIndicator2(const uint larvaIndex, const uint from, const uint to)
+{
+    int changeDirectionalityCounter = 0;
+    int timepointsTested = 0;
+    uint nSpinepoints = this->mLarvae[larvaIndex].getNSpinePoints();
+    for(uint i = from; i <= to; i++)
+    {
+        double movementDirection;
+        if (this->mLarvae.at(larvaIndex).getMovementDirectionAt(i,movementDirection))
+        {
+            timepointsTested++;
+            
+            cv::Point head = mLarvae[larvaIndex].parameters[i].spine.at(0);
+            cv::Point tail = mLarvae[larvaIndex].parameters[i].spine.at(nSpinepoints-1);
+            double angleMainBodyDirectionality = Calc::calcAngleToYAxes(tail,head);
+            
+            double angleDiff = Calc::calcAngleDiff(movementDirection,angleMainBodyDirectionality);
+            
+            if (angleDiff > 50)
+            {
+                ++changeDirectionalityCounter;
+            }
+        }
+    }
+    
+    if(timepointsTested > 0)
+    {
+        double fraction = changeDirectionalityCounter / (double)timepointsTested;
+        
+        if(fraction > 0.8) // PARAMS
+        {
+            return -1;
+        }
+        else if(fraction < 0.2)
+        {
+            return 1;
+        }
+    }
+    
+    return 0; // no decision can be made
+}
+
+bool LarvaeContainer::changeDirectionality(const uint larvaIndex, const uint timePoint, const RawLarva &rawlarva)
+{
+    FIMTypes::spine_t previousSpine;
+    FIMTypes::spine_t curSpine = rawlarva.getDiscreteSpine();
     bool change = false;
     if(timePoint > 0 && this->mLarvae.at(larvaIndex).getSpineAt(timePoint-1,previousSpine))
     {
@@ -1983,10 +2184,13 @@ bool LarvaeContainer::changeDirectionality(uint larvaIndex, uint timePoint, cons
         cv::Point prevTail  = previousSpine.at(previousSpine.size()-1);
         
         cv::Point curHead   = curSpine.at(0);
+        cv::Point curTail   = curSpine.at(curSpine.size()-1);
         
         double dH2H = Calc::eucledianDist(prevHead,curHead);
         double dT2H = Calc::eucledianDist(prevTail,curHead);
-        if(dT2H < dH2H)
+        double dH2T = Calc::eucledianDist(prevHead,curTail);
+        double dT2T = Calc::eucledianDist(prevTail,curTail);
+        if(dH2T + dT2H < dT2T + dH2H)
         {
             change = true;
         }
@@ -2003,7 +2207,7 @@ template<class T> std::vector<T> LarvaeContainer::reverseVec(std::vector<T> cons
     return retVec;
 }
 
-void LarvaeContainer::createNewLarva(uint timePoint, const RawLarva &rawLarva, unsigned int larvaID)
+void LarvaeContainer::createNewLarva(const uint timePoint, const RawLarva &rawLarva, unsigned int larvaID)
 {
     Larva l;
     l.setNSpinePoints(rawLarva.getDiscreteSpine().size());
@@ -2032,3 +2236,18 @@ uint LarvaeContainer::getLastValidLavaID() const
     
     return res;
 }
+
+bool LarvaeContainer::getContour(const uint larvaID, FIMTypes::contour_t &contour) const
+{
+    size_t index;
+    if(this->getIndexOfLarva(larvaID, index))
+    {
+        contour = this->mLarvae.at(index).contour;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+

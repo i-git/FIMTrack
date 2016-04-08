@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -51,59 +51,6 @@ namespace QtOpencvCore
 
          // return the QImage
          return QImage((uchar*) img.data, img.cols, img.rows, img.step, QImage::Format_RGB888);
-    }
-    
-    QImage img2qimgRaw(cv::Mat const& img)
-    {
-        // create a temporary image (parameter img is const!)
-         cv::Mat dst;
-
-         // convert the color to RGB (OpenCV uses BGR)
-         switch (img.type()) {
-         case CV_8UC1:
-            cv::cvtColor(img, dst, CV_GRAY2BGR);
-            break;
-         default:
-             dst = img.clone();
-             break;
-         }
-        
-        int h = dst.rows;
-        int w = dst.cols;
-        int channels = dst.channels();
-        QImage qimg = QImage(w, h, QImage::Format_RGB32);
-        uchar *data = dst.data;
-        
-        for (int y = 0; y < h; y++, data += dst.step)
-        {
-            for (int x = 0; x < w; x++)
-            {
-                uchar r, g, b, a = 0;
-                if (channels == 1)
-                {
-                    r = data[x * channels];
-                    g = data[x * channels];
-                    b = data[x * channels];
-                }
-                else if (channels == 3 || channels == 4)
-                {
-                    r = data[x * channels + 2];
-                    g = data[x * channels + 1];
-                    b = data[x * channels];
-                }
-                
-                if (channels == 4)
-                {
-                    a = data[x * channels + 3];
-                    qimg.setPixel(x, y, qRgba(r, g, b, a));
-                }
-                else
-                {
-                    qimg.setPixel(x, y, qRgb(r, g, b));
-                }
-            }
-        }
-        return qimg;
     }
     
     std::vector<std::string>& qstrList2strList(QStringList const& qStringList, std::vector<std::string>& strList)

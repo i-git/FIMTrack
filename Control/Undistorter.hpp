@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -53,22 +53,22 @@ public:
     void setParameter(cv::Mat const& cameraMatrix, 
                       cv::Mat const& distCoeffs, 
                       cv::Size const& imageSize);
-
-    cv::Mat& getUndistortImage(cv::Mat const& src, 
-                               cv::Mat &dst) const;
+    
+    void getUndistortImage(cv::Mat const& src, 
+                           cv::Mat &dst) const;
     
     bool isReady() const;
     
     void setReady(bool flag);
     
     void reset();
-
+    
 private:
-    bool        mIsInitialised;
-    cv::Mat     mCameraMatrix;
-    cv::Mat     mDistCoeffs;
-    cv::Mat     mMapX, mMapY;
-    cv::Size    mImageSize;
+    bool        _isInitialised;
+    cv::Mat     _cameraMatrix;
+    cv::Mat     _distCoeffs;
+    cv::Mat     _mapX, _mapY;
+    cv::Size    _imageSize;
 };
 
 #endif // UNDISTORTER_HPP

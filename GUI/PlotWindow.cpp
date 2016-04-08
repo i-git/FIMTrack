@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -76,9 +76,6 @@ void PlotWindow::plotCurrentTimeStepMarker(double timeStep, double firstTimeStep
 void PlotWindow::setPlottingParameter(const PlottingParameter &param)
 {
     this->mPlottingParameter = param;
-    
-    if(!this->mPlottingParameter.titel.isNull() && !this->mPlottingParameter.titel.isEmpty())
-        this->mPlotter->setPlotTitle(this->mPlottingParameter.titel);
     
     if(!this->mPlottingParameter.xMin.isNull() && !this->mPlottingParameter.xMin.isEmpty() 
             && !this->mPlottingParameter.xMax.isNull() && !this->mPlottingParameter.xMax.isEmpty())

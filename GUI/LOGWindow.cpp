@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -46,11 +46,6 @@ LOGWindow::LOGWindow(QWidget *parent) :
         this->setWindowFlags(Qt::Window);
         
         connect(Logger::getInstance(), SIGNAL(newLogMessage(QString)), ui->plainTextEdit, SLOT(appendPlainText(QString)));
-        
-//        this->ui->plainTextEdit->setStyleSheet("background-color: white");
-//        QPalette p = this->ui->plainTextEdit->palette();
-//        p.setColor(QPalette::Text, Qt::black);
-//        this->ui->plainTextEdit->setPalette(p);
     }
     catch(...)
     {

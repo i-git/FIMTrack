@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -35,11 +35,10 @@
 
 TrackerScene::TrackerScene(QObject *parent) : QGraphicsScene(parent)
 {
-    this->mMousePressed = false;
-    this->mImage = this->addPixmap(QPixmap());
-    this->mROIContainer = NULL;
-    //    this->mLandmarkContainer = NULL;
-    this->mLandmarkContainer = new LandmarkContainer(this);
+    this->mMousePressed         = false;
+    this->mImage                = this->addPixmap(QPixmap());
+    this->mROIContainer         = nullptr;
+    this->mLandmarkContainer    = new LandmarkContainer(this);
 }
 
 TrackerScene::~TrackerScene()
@@ -50,17 +49,8 @@ TrackerScene::~TrackerScene()
 TrackerSceneLarva* TrackerScene::addLarva(Larva* larva, QColor color)
 {
     TrackerSceneLarva *res = new TrackerSceneLarva(this, larva, color);
-//    this->mLarvae.push_back(res);
     return res;
 }
-
-//void TrackerScene::updateLarvae(unsigned int time)
-//{
-//    for (unsigned int i = 0; i < this->mLarvae.size(); i++)
-//    {
-//        this->mLarvae.at(i)->updateTime(time);
-//    }
-//}
 
 QPixmap TrackerScene::getPixmap()
 {
@@ -96,15 +86,6 @@ void TrackerScene::checkForRIOContainer()
         this->addItem(this->mROIContainer);
     }
 }
-
-void TrackerScene::checkForLandmakContainer()
-{
-    //    if(!this->mLandmarkContainer)
-    //    {
-    //        this->mLandmarkContainer = new LandmarkContainer(this);
-    //    }
-}
-
 void TrackerScene::addROI(const QPointF &p, RegionOfInterest::RegionOfInterestType type)
 {
     bool ok;
@@ -112,7 +93,7 @@ void TrackerScene::addROI(const QPointF &p, RegionOfInterest::RegionOfInterestTy
     
     if(this->mROIContainer)
     {
-        roiName = QInputDialog::getText(NULL, 
+        roiName = QInputDialog::getText(nullptr, 
                                         "Add new Region of Interest", 
                                         "RIO-Name:",
                                         QLineEdit::Normal,
@@ -121,7 +102,7 @@ void TrackerScene::addROI(const QPointF &p, RegionOfInterest::RegionOfInterestTy
     }
     else
     {
-        roiName = QInputDialog::getText(NULL, 
+        roiName = QInputDialog::getText(nullptr, 
                                         "Add new Region of Interest", 
                                         "RIO-Name:",
                                         QLineEdit::Normal,
@@ -175,7 +156,7 @@ void TrackerScene::removeROI(QPointF const& p)
         if(this->mROIContainer->isEmpty())
         {
             this->removeItem(this->mROIContainer);
-            this->mROIContainer = NULL;
+            this->mROIContainer = nullptr;
         }
     }
 }
@@ -195,7 +176,7 @@ void TrackerScene::loadROIContainer(const QString &path)
     {
         this->removeItem(this->mROIContainer);
         delete this->mROIContainer;
-        this->mROIContainer = NULL;
+        this->mROIContainer = nullptr;
     }
 }
 
@@ -206,7 +187,7 @@ void TrackerScene::addLandmark(QPointF const& p, Landmark::Type type)
     
     if(this->mLandmarkContainer)
     {
-        landmarkName = QInputDialog::getText(NULL, 
+        landmarkName = QInputDialog::getText(nullptr, 
                                              "Add new Landmark", 
                                              "Landmarkname:",
                                              QLineEdit::Normal,
@@ -215,7 +196,7 @@ void TrackerScene::addLandmark(QPointF const& p, Landmark::Type type)
     }
     else
     {
-        landmarkName = QInputDialog::getText(NULL, 
+        landmarkName = QInputDialog::getText(nullptr, 
                                              "Add new Landmark", 
                                              "Landmarkname:",
                                              QLineEdit::Normal,
@@ -225,7 +206,6 @@ void TrackerScene::addLandmark(QPointF const& p, Landmark::Type type)
     
     if(ok)
     {
-        this->checkForLandmakContainer();
         if(landmarkName.isNull() || landmarkName.isEmpty())
         {
             switch(type)
@@ -278,11 +258,6 @@ void TrackerScene::removeLandmark(const QPointF &p)
     if(this->mLandmarkContainer)
     {
         this->mLandmarkContainer->removeLandmak(p);
-        //        if(this->mLandmarkContainer->isEmpty())
-        //        {
-        //            delete this->mLandmarkContainer;
-        //            this->mLandmarkContainer = NULL;
-        //        }
     }
 }
 
@@ -295,13 +270,7 @@ bool TrackerScene::landmarkContainsPoint(const QPointF &p)
 
 void TrackerScene::loadLandmarkContainer(const QString &path)
 {
-    this->checkForLandmakContainer();
     InputGenerator::readLandmarks(QtOpencvCore::qstr2str(path), this->mLandmarkContainer);
-    //    if(this->mLandmarkContainer->isEmpty())
-    //    {
-    //        delete this->mLandmarkContainer;
-    //        this->mLandmarkContainer = NULL;
-    //    }
 }
 
 void TrackerScene::clearScene()
@@ -310,13 +279,11 @@ void TrackerScene::clearScene()
     //    this->mLarvae.clear();
     this->mImage = this->addPixmap(QPixmap());
     
-    this->mROIContainer = NULL;
+    this->mROIContainer = nullptr;
     
     if(this->mLandmarkContainer)
     {
         this->mLandmarkContainer->clear();
-        //        delete this->mLandmarkContainer;
-        //        this->mLandmarkContainer = NULL;
     }
 }
 
@@ -332,7 +299,6 @@ QImage TrackerScene::getSaveImage(QVector<TrackerSceneLarva*> larvaVector)
         QPainter painter(&image);
         painter.setRenderHint(QPainter::Antialiasing);
         this->render(&painter);
-        //        this->render(&painter, QPoint(), QRegion(), QWidget::DrawChildren);
     }
     
     foreach(TrackerSceneLarva* tl, larvaVector)

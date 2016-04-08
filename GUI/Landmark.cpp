@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -38,16 +38,16 @@ Landmark::Landmark()
     this->mType             = POINT;
     this->mName             = "";
     
-    this->mIcon             = NULL;
+    this->mIcon             = nullptr;
     
-    this->mLine             = NULL;
-    this->mLineAnchorFirst  = NULL;
-    this->mLineAnchorSecond = NULL;
+    this->mLine             = nullptr;
+    this->mLineAnchorFirst  = nullptr;
+    this->mLineAnchorSecond = nullptr;
     
-    this->mRect             = NULL;
-    this->mRectAnchor       = NULL;
+    this->mRect             = nullptr;
+    this->mRectAnchor       = nullptr;
     
-    this->mEllipse          = NULL;
+    this->mEllipse          = nullptr;
 }
 
 Landmark::Landmark(const QString &name, qreal xPos, qreal yPos, int type)
@@ -55,16 +55,16 @@ Landmark::Landmark(const QString &name, qreal xPos, qreal yPos, int type)
     this->mType             = type;
     this->mName             = name;
     
-    this->mIcon             = NULL;
+    this->mIcon             = nullptr;
     
-    this->mLine             = NULL;
-    this->mLineAnchorFirst  = NULL;
-    this->mLineAnchorSecond = NULL;
+    this->mLine             = nullptr;
+    this->mLineAnchorFirst  = nullptr;
+    this->mLineAnchorSecond = nullptr;
     
-    this->mRect             = NULL;
-    this->mRectAnchor       = NULL;
+    this->mRect             = nullptr;
+    this->mRectAnchor       = nullptr;
     
-    this->mEllipse          = NULL;
+    this->mEllipse          = nullptr;
     
     this->setToolTip(this->mName);
     this->initialize(xPos, yPos);

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -37,11 +37,8 @@
 #include "Configuration/FIMTrack.hpp"
 #include <cmath>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QGraphicsLineItem>
 #include <QPainter>
-#pragma clang diagnostic pop
 
 
 class Arrow : public QGraphicsLineItem
@@ -62,7 +59,7 @@ private:
     double getAngle(const QLineF &l);
     
 public:
-    Arrow(QGraphicsItem *parent = 0, QGraphicsScene *scene = 0);
+    Arrow(QGraphicsItem *parent = 0);
     ~Arrow();
     
     void setColor(QColor const& color) {this->mColor = color;}

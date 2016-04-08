@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -40,13 +40,10 @@
 #include <string>
 #include <map>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QTime>
 #include <QMutex>
 #include <QFileInfo>
 #include <QDir>
-#pragma clang diagnostic pop
 
 #include "Configuration/FIMTrack.hpp"
 #include "Backgroundsubtractor.hpp"
@@ -59,10 +56,6 @@
 #include "LarvaeContainer.hpp"
 #include "GUI/RegionOfInterestContainer.hpp"
 #include "Algorithm/Hungarian.hpp"
-
-typedef std::vector<cv::Point> contourType;
-
-typedef std::vector<cv::Point> spineType;
 
 /**
  * @brief The Tracker class contains all necessary steps for tracking. Tracking is done in two major steps:
@@ -111,31 +104,41 @@ public slots:
      * @param showProgress is true if the preview image shall be displayed in the main gui
      * @param previewImg is a pointer to an image for the tracking preview
      */
-    void startTrackingSlot(std::vector<std::vector<std::string> > const & multiImgPaths, bool showProgress, Undistorter const & undist, RegionOfInterestContainer const* ROIContainer = NULL);
+    void startTrackingSlot(std::vector<std::vector<std::string> > const & _multiImgPaths, bool showProgress, Undistorter const & undist, RegionOfInterestContainer const* ROIContainer = nullptr);
+
+    /**
+     * @brief invoked when stop button in main gui was pushed. indicates that tracking should stop after currently tracked image.
+     */
+    void stopTrackingSlot();
+
 
 private:
     // MEMBER VARIABLES:  
     /**
      * @brief curRawLarvae stores the current raw larvae objects
      */
-    std::vector<RawLarva> curRawLarvae;
+    std::vector<RawLarva> _curRawLarvae;
     /**
      * @brief larvae stores the larvae objects, which are generated and assigned from the raw larvae objects
      */
-//    std::vector<Larva> larvae;
-    LarvaeContainer mLarvaeContainer;
+    LarvaeContainer _larvaeContainer;
 
-    unsigned int larvaID;
+    unsigned int _larvaID;
 
     /**
      * @brief imgPaths stores the path where to find the images
      */
-    std::vector<std::vector<std::string> > multiImgPaths;
+    std::vector<std::vector<std::string> > _multiImgPaths;
 
     /**
      * @brief showTrackingProgress is used to activate / inactivate the live tracking preview in the main gui
      */
-    bool showTrackingProgress;
+    bool _showTrackingProgress;
+
+    /**
+     * @brief indicates if stop button in main gui was pressed
+     */
+    bool _stopTracking;
 
     // MEMBER FUNCTIONS:
     /**
@@ -147,8 +150,9 @@ private:
      *
      * @param bs is a background subtractor object
      * @param previewImg a pointer to an image for live tracking preview in the main gui
+     * @return number of processed images (timepoint)
      */
-    void track(std::vector<std::string> const &imgPaths, Backgroundsubtractor const & bs, Undistorter const & undist, const RegionOfInterestContainer *ROIContainer = NULL);
+    uint track(std::vector<std::string> const &imgPaths, Backgroundsubtractor const & bs, Undistorter const & undist, const RegionOfInterestContainer *ROIContainer = nullptr);
 
     /**
      * @brief extractRawLarvae extractes the raw larvae objects from the images.
@@ -161,14 +165,26 @@ private:
      * @param img current image
      * @param bs a Backgoundsubtractor object containing the background image
      * @param previewImage is a pointer to the preview image of the main gui to draw the contours
+     * @param checkRoiBorders indicates if RegionOfInterest was selected (thus contours must be fully within this region to be valid)
      */
-    void extractRawLarvae(const cv::Mat &img, Backgroundsubtractor const & bs, cv::Mat *previewImg);
+    void extractRawLarvae(const cv::Mat &img, Backgroundsubtractor const & bs, cv::Mat *previewImg, bool checkRoiBorders);
     
+    /**
+     * @brief assignByHungarian assigns larvae by minimizing overall cost (or maximizing overall utility) using the hungarian algorithm.
+     *
+     * @param timePoint current timepoint
+     */
     void assignByHungarian(unsigned int timePoint);
+
+    /**
+     * @brief assignByGreedy assigns larvae by selecting the first accurate match for a raw larva.
+     *
+     * @param timePoint current timepoint
+     */
+    void assignByGreedy(unsigned int timePoint);
    
+    /// helper for hungarian assignment function
     bool larvaHasPointInRawLarva(unsigned int const timePoint, Larva const & larva, RawLarva const& rawLarva);
-    
-//    void interplolateLarvae(void);
 
 };
 

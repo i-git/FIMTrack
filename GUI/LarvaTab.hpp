@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,12 +34,9 @@
 #ifndef RESULTSVIEWERLARVAPARAMETER_HPP
 #define RESULTSVIEWERLARVAPARAMETER_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QWidget>
 #include <QTimer>
 #include <QMessageBox>
-#pragma clang diagnostic pop
 
 #include "Data/Larva.hpp"
 #include "Control/LarvaeContainer.hpp"
@@ -164,11 +161,6 @@ private slots:
     *	Unite model with different model from results (add before/after all timesteps of this model)
     **/
     void attachOtherModel();
-    
-    /**
-    *	Cut off successive timesteps and add them as a new model to the results
-    **/
-    //    void divideAfterCurrentTimestep         ();
     
     /**
     *	Delete Larva from results

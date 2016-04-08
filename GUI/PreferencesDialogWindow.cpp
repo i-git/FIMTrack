@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -40,8 +40,6 @@ PreferencesDialogWindow::PreferencesDialogWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(this, SIGNAL(logMessage(QString,LOGLEVEL)), Logger::getInstance(), SLOT(handleLogMessage(QString,LOGLEVEL)));
-    
-//    this->setWindowFlags(Qt::Window);
 }
 
 PreferencesDialogWindow::~PreferencesDialogWindow()
@@ -98,6 +96,7 @@ void PreferencesDialogWindow::on_checkBoxLarvaeExtactionParameterUseDefauilt_cli
     /* Coiled Recognition Parameters */
     this->ui->doubleSpinBoxCoiledRecognitionParametersPerimeterToSpinelenghtThreshold->setEnabled(!checked);
     this->ui->doubleSpinBoxCoiledRecognitionParametersMidcirclePerimeterToPerimeterThreshold->setEnabled(!checked);
+    this->ui->doubleSpinBoxCoiledRecognitionParametersMaxToMeanRadiusThreshold->setEnabled(!checked);
 }
 
 void PreferencesDialogWindow::on_btnCancel_clicked()
@@ -144,6 +143,7 @@ void PreferencesDialogWindow::readParameters()
     /* Coiled Recognition Parameters */
     LarvaeExtractionParameters::CoiledRecognitionParameters::dPerimeterToSpinelenghtThreshold = this->ui->doubleSpinBoxCoiledRecognitionParametersPerimeterToSpinelenghtThreshold->value();
     LarvaeExtractionParameters::CoiledRecognitionParameters::dMidcirclePerimeterToPerimeterThreshold = this->ui->doubleSpinBoxCoiledRecognitionParametersMidcirclePerimeterToPerimeterThreshold->value();
+    LarvaeExtractionParameters::CoiledRecognitionParameters::dMaxToMeanRadiusThreshold = this->ui->doubleSpinBoxCoiledRecognitionParametersMaxToMeanRadiusThreshold->value();
     /* Stop and Go Phase Calculation Parameters */
     LarvaeExtractionParameters::StopAndGoCalculation::bUseDynamicStopAndGoParameterCalculation = this->ui->checkBoxLarvaeExtactionParametersUseDynamicStopAndGo->isChecked();
     LarvaeExtractionParameters::StopAndGoCalculation::iFramesForSpeedCalculation = this->ui->spinBoxStopAndGoFramesForSpeedCalc->value();
@@ -156,6 +156,11 @@ void PreferencesDialogWindow::readParameters()
     LarvaeExtractionParameters::MovementDirectionParameters::bUseDynamicMovementDirectionParameterCalculation = this->ui->checkBoxLarvaeExtactionParametersUseDynamicMovementDirection->isChecked();
     LarvaeExtractionParameters::MovementDirectionParameters::iFramesForMovementDirectionCalculation = this->ui->spinBoxMovementDirectionFramesForDirectionCalc->value();
 
+    /* Tracking Assignment Parameters */
+    LarvaeExtractionParameters::AssignmentParameters::eAssignmentMethod = static_cast<LarvaeExtractionParameters::AssignmentParameters::AssignmentMethod>(this->ui->comboBoxTrackingAssignmentMethod->currentIndex());
+    LarvaeExtractionParameters::AssignmentParameters::eCostMeasure = static_cast<LarvaeExtractionParameters::AssignmentParameters::CostMeasure>(this->ui->comboBoxTrackingAssignmentCostMeasure->currentIndex());
+    LarvaeExtractionParameters::AssignmentParameters::dDistanceThreshold = this->ui->doubleSpinBoxGreedyAssignmentThreshold->value();
+    LarvaeExtractionParameters::AssignmentParameters::dOverlapThreshold = this->ui->doubleSpinBoxGreedyAssignmentThreshold->value();
 }
 
 void PreferencesDialogWindow::setParameters()
@@ -205,6 +210,7 @@ void PreferencesDialogWindow::setParameters()
     /* Coiled Recognition Parameters */
     this->ui->doubleSpinBoxCoiledRecognitionParametersPerimeterToSpinelenghtThreshold->setValue(LarvaeExtractionParameters::CoiledRecognitionParameters::dPerimeterToSpinelenghtThreshold);
     this->ui->doubleSpinBoxCoiledRecognitionParametersMidcirclePerimeterToPerimeterThreshold->setValue(LarvaeExtractionParameters::CoiledRecognitionParameters::dMidcirclePerimeterToPerimeterThreshold);
+    this->ui->doubleSpinBoxCoiledRecognitionParametersMaxToMeanRadiusThreshold->setValue(LarvaeExtractionParameters::CoiledRecognitionParameters::dMaxToMeanRadiusThreshold);
     /* Stop and Go Phase Calculation */
     this->ui->spinBoxStopAndGoFramesForSpeedCalc->setValue(LarvaeExtractionParameters::StopAndGoCalculation::iFramesForSpeedCalculation);
     this->ui->spinBoxStopAndGoSpeedThreshold->setValue(LarvaeExtractionParameters::StopAndGoCalculation::iSpeedThreshold);
@@ -212,6 +218,7 @@ void PreferencesDialogWindow::setParameters()
 
     this->ui->doubleSpinBoxCoiledRecognitionParametersPerimeterToSpinelenghtThreshold->setEnabled(!this->ui->checkBoxLarvaeExtactionParameterUseDefauilt->isChecked());
     this->ui->doubleSpinBoxCoiledRecognitionParametersMidcirclePerimeterToPerimeterThreshold->setEnabled(!this->ui->checkBoxLarvaeExtactionParameterUseDefauilt->isChecked());
+    this->ui->doubleSpinBoxCoiledRecognitionParametersMaxToMeanRadiusThreshold->setEnabled(!this->ui->checkBoxLarvaeExtactionParameterUseDefauilt);
 
     /* Stop and Go calculation */
     this->ui->spinBoxStopAndGoFramesForSpeedCalc->setEnabled(!this->ui->checkBoxLarvaeExtactionParametersUseDynamicStopAndGo->isChecked());
@@ -223,6 +230,11 @@ void PreferencesDialogWindow::setParameters()
 
     /* Movement Direction Calculation */
     this->ui->spinBoxMovementDirectionFramesForDirectionCalc->setEnabled(!this->ui->checkBoxLarvaeExtactionParametersUseDynamicMovementDirection->isChecked());
+
+    /* Tracking Assignment Parameters */
+    this->ui->comboBoxTrackingAssignmentMethod->setCurrentIndex(LarvaeExtractionParameters::AssignmentParameters::eAssignmentMethod);
+    this->ui->comboBoxTrackingAssignmentCostMeasure->setCurrentIndex(LarvaeExtractionParameters::AssignmentParameters::eCostMeasure);
+    this->ui->doubleSpinBoxGreedyAssignmentThreshold->setValue(LarvaeExtractionParameters::AssignmentParameters::dDistanceThreshold);
 }
 
 void PreferencesDialogWindow::updateBackgroungSpinboxesValues(unsigned int iNumberOfFiles)
@@ -311,3 +323,8 @@ void PreferencesDialogWindow::on_doubleSpinBoxBodyBendingAngleThreshold_editingF
     this->ui->doubleSpinBoxBodyBendingAngleThreshold->setValue(angle);
 }
 
+
+void PreferencesDialogWindow::on_comboBoxTrackingAssignmentMethod_currentIndexChanged(int index)
+{
+    this->ui->doubleSpinBoxGreedyAssignmentThreshold->setEnabled(index == 1);
+}

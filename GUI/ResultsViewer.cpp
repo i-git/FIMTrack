@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -40,40 +40,40 @@ ResultsViewer::ResultsViewer(QWidget *parent) :
 {
     ui->setupUi(this);
     
-    this->mDrawOpenCV       = false;
+    mDrawOpenCV       = false;
     
-    this->mTimer            = new QTimer(this);
-    this->mZoomFactor       = 0;
-    this->mPlayingModeOn    = false;
+    mTimer            = new QTimer(this);
+    mZoomFactor       = 0;
+    mPlayingModeOn    = false;
     
-    this->mScene            = this->ui->graphicsView->getScene();    
-    this->mBtnAddTab        = new QToolButton(this->ui->larvaTabWidget);
-    this->mBtnAddTab->setIcon(QIcon::fromTheme("list-add"));
-    this->mBtnAddTab->setText("+");
-    this->mBtnAddTab->setCursor(Qt::ArrowCursor);
-    this->mBtnAddTab->setAutoRaise(true);
-    this->ui->larvaTabWidget->setCornerWidget(this->mBtnAddTab, Qt::TopRightCorner);
+    mScene            = ui->graphicsView->getScene();    
+    mBtnAddTab        = new QToolButton(ui->larvaTabWidget);
+    mBtnAddTab->setIcon(QIcon::fromTheme("list-add"));
+    mBtnAddTab->setText("+");
+    mBtnAddTab->setCursor(Qt::ArrowCursor);
+    mBtnAddTab->setAutoRaise(true);
+    ui->larvaTabWidget->setCornerWidget(mBtnAddTab, Qt::TopRightCorner);
     
-    dynamic_cast<TrackerGraphicsView*>(this->ui->graphicsView)->enableLandmarkContextMenu();
-    dynamic_cast<TrackerGraphicsView*>(this->ui->graphicsView)->enableContextMenu(true);
-    this->ui->graphicsView->setEnabled(false);
-    this->ui->pbtOneStepPrevTime->setEnabled(false);
-    this->ui->pbtPlayPause->setEnabled(false);
-    this->ui->pbtOneStepNextTime->setEnabled(false);
-    this->ui->larvaTabWidget->setEnabled(false);
-    this->ui->horizontalSlider_images->setEnabled(false);
-    this->ui->tableView->setEnabled(false);
-    this->ui->tabWidget_images->setEnabled(false);
+    dynamic_cast<TrackerGraphicsView*>(ui->graphicsView)->enableLandmarkContextMenu();
+    dynamic_cast<TrackerGraphicsView*>(ui->graphicsView)->enableContextMenu(true);
+    ui->graphicsView->setEnabled(false);
+    ui->pbtOneStepPrevTime->setEnabled(false);
+    ui->pbtPlayPause->setEnabled(false);
+    ui->pbtOneStepNextTime->setEnabled(false);
+    ui->larvaTabWidget->setEnabled(false);
+    ui->horizontalSlider_images->setEnabled(false);
+    ui->tableView->setEnabled(false);
+    ui->tabWidget_images->setEnabled(false);
     
-    this->mPlottingTabVisible = false;
-    this->mLarvaIDForCropping = 0;
+    mPlottingTabVisible = false;
+    mLarvaIDForCropping = 0;
     
-    this->ui->tab_3->setLarvaeContainerPointer(&this->mLarvaeContainer);
+    ui->tab_3->setLarvaeContainerPointer(&mLarvaeContainer);
     
-    this->setupConnections();
+    setupConnections();
     
-    this->setWindowFlags(Qt::Window);
-    this->showMaximized();
+    setWindowFlags(Qt::Window);
+    showMaximized();
 }
 
 ResultsViewer::~ResultsViewer()
@@ -83,15 +83,15 @@ ResultsViewer::~ResultsViewer()
 
 void ResultsViewer::showImage(int const index)
 {
-    if (!this->mFileNames.empty())
+    if (!mFileNames.empty())
     {
         /* get the selected image fileNames list */
-        cv::Mat img = cv::imread(QtOpencvCore::qstr2str(this->mFileNames.at(index)), 0);
+        cv::Mat img = cv::imread(QtOpencvCore::qstr2str(mFileNames.at(index)), 0);
         
-        this->mImageSize.setWidth(img.size().width);
-        this->mImageSize.setHeight(img.size().height);
+        mImageSize.setWidth(img.size().width);
+        mImageSize.setHeight(img.size().height);
         
-        emit sendNewImageSize(this->mImageSize);
+        emit sendNewImageSize(mImageSize);
         
         if(mUndistorer.isReady())
         {
@@ -103,88 +103,22 @@ void ResultsViewer::showImage(int const index)
         cv::Mat cImg = cv::Mat::zeros(img.size(), CV_8UC3);
         cv::cvtColor(img,cImg,CV_GRAY2BGR);
         
-        //        if(!this->mLoadedLarvae.empty())
-        //        {
-        //            //            this->mScene->updateLarvae(index);
-        
-        //            if(this->mDrawOpenCV)
-        //            {
-        //                for (auto it = this->mLoadedLarvae.begin(); it != this->mLoadedLarvae.end(); ++it)
-        //                {
-        //                    spineType spine;
-        //                    if(it->getSpineAt(index,spine))
-        //                    {
-        //                        cv::Point head = spine.at(0);
-        //                        cv::Point tail = spine.at(it->getNSpinePoints()-1);
-        //                        cv::Point mid = spine.at(it->getSpineMidPointIndex());
-        
-        //                        bool isCoiled;
-        //                        cv::Scalar color;
-        //                        it->getIsCoiledIndicatorAt(index,isCoiled);
-        //                        if(!isCoiled)
-        //                            color = cv::Scalar(0,255,255);
-        //                        else
-        //                            color = cv::Scalar(255,0,255);
-        
-        //                        cv::circle(cImg,head,2,cv::Scalar(0,0,255),2);
-        //                        cv::circle(cImg,tail,2,cv::Scalar(255,0,0),2);
-        //                        cv::circle(cImg,mid,2,color,2);
-        
-        //                        cv::line(cImg,head,mid,color);
-        //                        cv::line(cImg,mid,tail,color);
-        
-        //                        bool isLeftBended;
-        //                        bool isRightBended;
-        
-        //                        cv::Scalar bendingTextColor(255,255,255);
-        
-        //                        if (it->getLeftBendingIndicatorAt(index,isLeftBended) &&
-        //                                it->getRightBendingIndicatorAt(index,isRightBended))
-        //                        {
-        //                            if(isLeftBended)
-        //                                bendingTextColor = cv::Scalar(0,0,255);
-        //                            else if(isRightBended)
-        //                                bendingTextColor = cv::Scalar(0,255,0);
-        //                        }
-        
-        //                        std::stringstream ss;
-        //                        ss << it->getID();
-        //                        std::string text = "";
-        
-        //                        int goPhase;
-        //                        if(it->getGoPhaseIndicatorAt(index,goPhase))
-        //                        {
-        //                            text = ":stop";
-        
-        //                            if(goPhase == 1)
-        //                                text = ":go";
-        
-        //                            ss << text;
-        
-        //                        }
-        //                        cv::putText(cImg,ss.str(),head,cv::FONT_HERSHEY_PLAIN, 1, bendingTextColor, 1);
-        
-        //                    } 
-        //                }
-        //            }
-        //        }
-        
         QImage qimg = QtOpencvCore::img2qimg(cImg);
         
         /* convert the opencv image to a QPixmap (to show in a QLabel) */
         QPixmap pixMap = QPixmap::fromImage(qimg);
         
-        this->mScene->setPixmap(pixMap);
+        mScene->setPixmap(pixMap);
     }
 }
 
 void ResultsViewer::showTable(const int index)
 {
-    if (!this->mFileNames.empty())
+    if (!mFileNames.empty())
     {
-        if(this->mLarvaeContainer.hasLoadedLarvae())
+        if(mLarvaeContainer.hasLoadedLarvae())
         {
-            unsigned int nLarvae = this->mLarvaeContainer.getNumberOfLarvae();
+            unsigned int nLarvae = mLarvaeContainer.getNumberOfLarvae();
             Larva l;
             int nLandmarks = 0;
             QStringList landmarkNames;
@@ -193,14 +127,14 @@ void ResultsViewer::showTable(const int index)
                 landmarkNames = mScene->getLandmarkContainer()->getAllLandmarkNames();
                 nLandmarks = landmarkNames.size();
             }
-
+            
             unsigned int nParameters = 16 +2*nLandmarks;
-
+            
             
             QStandardItemModel *tableModel = new QStandardItemModel(nParameters,nLarvae,this);
             for (unsigned int cols = 0; cols < nLarvae; ++cols)
             {
-                if(this->mLarvaeContainer.getLarva(cols, l))
+                if(mLarvaeContainer.getLarva(cols, l))
                 {
                     QString hHeader("larva(");
                     hHeader.append(QString::number(l.getID()));
@@ -208,26 +142,27 @@ void ResultsViewer::showTable(const int index)
                     tableModel->setHorizontalHeaderItem(cols, new QStandardItem(hHeader));
                 }
             }
-
+            
             tableModel->setVerticalHeaderItem(0, new QStandardItem(QString("area:")));
             tableModel->setVerticalHeaderItem(1, new QStandardItem(QString("mom_x:")));
             tableModel->setVerticalHeaderItem(2, new QStandardItem(QString("mom_y:")));
             tableModel->setVerticalHeaderItem(3, new QStandardItem(QString("bodyBending:")));
             tableModel->setVerticalHeaderItem(4, new QStandardItem(QString("isCoiled:")));
-            tableModel->setVerticalHeaderItem(5, new QStandardItem(QString("isLeftBended:")));
-            tableModel->setVerticalHeaderItem(6, new QStandardItem(QString("isRightBended:")));
-            tableModel->setVerticalHeaderItem(7, new QStandardItem(QString("isGoPhase:")));
-            tableModel->setVerticalHeaderItem(8, new QStandardItem(QString("movDirection:")));
-            tableModel->setVerticalHeaderItem(9, new QStandardItem(QString("spineLength:")));
-            tableModel->setVerticalHeaderItem(10, new QStandardItem(QString("perimeter:")));
-            tableModel->setVerticalHeaderItem(11, new QStandardItem(QString("momDist:")));
-            tableModel->setVerticalHeaderItem(12, new QStandardItem(QString("accDist:")));
-            tableModel->setVerticalHeaderItem(13, new QStandardItem(QString("distToOrigin:")));
-            tableModel->setVerticalHeaderItem(14, new QStandardItem(QString("velocity:")));
-            tableModel->setVerticalHeaderItem(15, new QStandardItem(QString("acceleration:")));
+            tableModel->setVerticalHeaderItem(5, new QStandardItem(QString("isWellOriented:")));
+            tableModel->setVerticalHeaderItem(6, new QStandardItem(QString("isLeftBended:")));
+            tableModel->setVerticalHeaderItem(7, new QStandardItem(QString("isRightBended:")));
+            tableModel->setVerticalHeaderItem(8, new QStandardItem(QString("isGoPhase:")));
+            tableModel->setVerticalHeaderItem(9, new QStandardItem(QString("movDirection:")));
+            tableModel->setVerticalHeaderItem(10, new QStandardItem(QString("spineLength:")));
+            tableModel->setVerticalHeaderItem(11, new QStandardItem(QString("perimeter:")));
+            tableModel->setVerticalHeaderItem(12, new QStandardItem(QString("momDist:")));
+            tableModel->setVerticalHeaderItem(13, new QStandardItem(QString("accDist:")));
+            tableModel->setVerticalHeaderItem(14, new QStandardItem(QString("distToOrigin:")));
+            tableModel->setVerticalHeaderItem(15, new QStandardItem(QString("velocity:")));
+            tableModel->setVerticalHeaderItem(16, new QStandardItem(QString("acceleration:")));
 
             int landmarkIndex = 0;
-            for (int i=16; i<nParameters; i+=2)
+            for (uint i=17; i<nParameters; i+=2)
             {
                 QString curLandmarkName = landmarkNames[landmarkIndex];
                 tableModel->setVerticalHeaderItem(i, new QStandardItem(curLandmarkName+QString(" dist")));
@@ -244,22 +179,24 @@ void ResultsViewer::showTable(const int index)
             double accDist;
             double distToOrigin;
             bool isCoiled;
+            bool isWellOriented;
             bool isLeftBended;
             bool isRightBended;
             int goPhaseIndicator;
             double movementDirection;
             int isCoiledInt;
+            int isWellOrientedInt;
             int isLeftBendedInt;
             int isRightBendedInt;
             double velocity;
             double acceleration;
             double distToLandmark;
             double bearingAngle;
-
+            
             
             for (unsigned int cols = 0; cols < nLarvae; ++cols)
             {
-                if(this->mLarvaeContainer.getLarva(cols, l))
+                if(mLarvaeContainer.getLarva(cols, l))
                 {
                     if (l.getMomentumAt(index,mom))
                     {
@@ -280,42 +217,48 @@ void ResultsViewer::showTable(const int index)
                             isCoiledInt = isCoiled ? 1 : 0;
                             tableModel->setItem(4,cols, new QStandardItem(QString::number(isCoiledInt)));
                         }
+
+                        if(l.getIsWellOrientedAt(index,isWellOriented))
+                        {
+                            isWellOrientedInt = isWellOriented ? 1 : 0;
+                            tableModel->setItem(5,cols, new QStandardItem(QString::number(isWellOrientedInt)));
+                        }
                         
                         if(l.getLeftBendingIndicatorAt(index,isLeftBended))
                         {
                             isLeftBendedInt = isLeftBended ? 1 : 0;
-                            tableModel->setItem(5,cols, new QStandardItem(QString::number(isLeftBendedInt)));
+                            tableModel->setItem(6,cols, new QStandardItem(QString::number(isLeftBendedInt)));
                         }
                         
                         if(l.getRightBendingIndicatorAt(index,isRightBended))
                         {
                             isRightBendedInt = isRightBended ? 1 : 0;
-                            tableModel->setItem(6,cols, new QStandardItem(QString::number(isRightBendedInt)));
+                            tableModel->setItem(7,cols, new QStandardItem(QString::number(isRightBendedInt)));
                         }
                         
                         if(l.getGoPhaseIndicatorAt(index,goPhaseIndicator))
                         {
-                            tableModel->setItem(7,cols, new QStandardItem(QString::number(goPhaseIndicator)));
+                            tableModel->setItem(8,cols, new QStandardItem(QString::number(goPhaseIndicator)));
                         }
                         
                         if(l.getMovementDirectionAt(index,movementDirection))
                         {
-                            tableModel->setItem(8,cols, new QStandardItem(QString::number(movementDirection)));
+                            tableModel->setItem(9,cols, new QStandardItem(QString::number(movementDirection)));
                         }
-
+                        
                         l.getVelosityAt(index, velocity);
                         l.getAccelerationAt(index, acceleration);
                         
-                        tableModel->setItem(9,cols, new QStandardItem(QString::number(spineLength)));
-                        tableModel->setItem(10,cols, new QStandardItem(QString::number(perimeter)));
-                        tableModel->setItem(11,cols, new QStandardItem(QString::number(momDist)));
-                        tableModel->setItem(12,cols, new QStandardItem(QString::number(accDist)));
-                        tableModel->setItem(13,cols, new QStandardItem(QString::number(distToOrigin)));
-                        tableModel->setItem(14, cols, new QStandardItem(QString::number(velocity)));
-                        tableModel->setItem(15, cols, new QStandardItem(QString::number(acceleration)));
+                        tableModel->setItem(10,cols, new QStandardItem(QString::number(spineLength)));
+                        tableModel->setItem(11,cols, new QStandardItem(QString::number(perimeter)));
+                        tableModel->setItem(12,cols, new QStandardItem(QString::number(momDist)));
+                        tableModel->setItem(13,cols, new QStandardItem(QString::number(accDist)));
+                        tableModel->setItem(14,cols, new QStandardItem(QString::number(distToOrigin)));
+                        tableModel->setItem(15, cols, new QStandardItem(QString::number(velocity)));
+                        tableModel->setItem(16, cols, new QStandardItem(QString::number(acceleration)));
 
                         int landmarkIndex = 0;
-                        for (int i=16; i<nParameters; i+=2)
+                        for (unsigned int i=17; i<nParameters; i+=2)
                         {
                             QString curLandmarkName = landmarkNames[landmarkIndex];
                             if(l.getDistanceToLandmark(index, curLandmarkName.toStdString(), distToLandmark))
@@ -331,87 +274,87 @@ void ResultsViewer::showTable(const int index)
                 }
             }
             
-            this->ui->tableView->setModel(tableModel);
+            ui->tableView->setModel(tableModel);
         }
     }
 }
 
 void ResultsViewer::setupConnections()
 {
-    connect(this->mTimer,                               SIGNAL(timeout()),                              this,                                               SLOT(moveSliderSlot()));
-    connect(this->ui->pbtPlayPause,                     SIGNAL(clicked()),                              this,                                               SLOT(playPause()));
-    connect(this->ui->pushButton_loadAllResults,        SIGNAL(clicked()),                              &this->mLarvaeContainer,                            SLOT(removeAllLarvae()));
-    connect(this->ui->pushButton_SaveResults,           SIGNAL(clicked()),                              this,                                               SLOT(saveResultLarvae()));
+    connect(mTimer,                               SIGNAL(timeout()),                                  this,                                               SLOT(moveSliderSlot()));
+    connect(ui->pbtPlayPause,                     SIGNAL(clicked()),                                  this,                                               SLOT(playPause()));
+    connect(ui->pushButton_loadAllResults,        SIGNAL(clicked()),                                  &mLarvaeContainer,                            SLOT(removeAllLarvae()));
+    connect(ui->pushButton_SaveResults,           SIGNAL(clicked()),                                  this,                                               SLOT(saveResultLarvae()));
     
-    connect(this->ui->pbtOneStepPrevTime,               SIGNAL(clicked()),                              this,                                               SLOT(goOneTimeStepPrev()));
-    connect(this->ui->pbtOneStepNextTime,               SIGNAL(clicked()),                              this,                                               SLOT(goOneTimeStepNext()));
+    connect(ui->pbtOneStepPrevTime,               SIGNAL(clicked()),                                  this,                                               SLOT(goOneTimeStepPrev()));
+    connect(ui->pbtOneStepNextTime,               SIGNAL(clicked()),                                  this,                                               SLOT(goOneTimeStepNext()));
     
-    //    connect(this->mBtnAddTab,                       SIGNAL(clicked()),                        this,                   SLOT(addTab()));
+    connect(&mLarvaeContainer,                    SIGNAL(sendLarvaModelDeleted()),                    this,                                               SLOT(updateLarvaeTabs()));
+    connect(&mLarvaeContainer,                    SIGNAL(sendRemovedResultLarvaID(uint)),             this,                                               SLOT(removeTabByLarvaID(uint)));
+    connect(&mLarvaeContainer,                    SIGNAL(reset()),                                    this,                                               SLOT(resetAndClear()));
+    connect(&mLarvaeContainer,                    SIGNAL(sendUpdatedResultLarvaID(uint)),             this,                                               SLOT(updateLarvaePath(uint)));
     
-    connect(&this->mLarvaeContainer,                    SIGNAL(sendLarvaModelDeleted()),                this,                                               SLOT(updateLarvaeTabs()));
-    connect(&this->mLarvaeContainer,                    SIGNAL(sendRemovedResultLarvaID(uint)),         this,                                               SLOT(removeTabByLarvaID(uint)));
-    connect(&this->mLarvaeContainer,                    SIGNAL(reset()),                                this,                                               SLOT(resetAndClear()));
-    connect(&this->mLarvaeContainer,                    SIGNAL(sendUpdatedResultLarvaID(uint)),         this,                                               SLOT(updateLarvaePath(uint)));
+    connect(mScene->getLandmarkContainer(),       SIGNAL(landmarkAdded(const Landmark*)),             &mLarvaeContainer,                            SLOT(updateLandmark(const Landmark*)));
+    connect(mScene->getLandmarkContainer(),       SIGNAL(landmarkRemoved(QString)),                   &mLarvaeContainer,                            SLOT(removeLandmark(QString)));
     
-    connect(this->mScene->getLandmarkContainer(),       SIGNAL(landmarkAdded(const Landmark*)),         &this->mLarvaeContainer,                            SLOT(updateLandmark(const Landmark*)));
-    connect(this->mScene->getLandmarkContainer(),       SIGNAL(landmarkRemoved(QString)),               &this->mLarvaeContainer,                            SLOT(removeLandmark(QString)));
+    connect(ui->pbtRemoveAllWhichAreShorterThen,  SIGNAL(clicked()),                                  this,                                               SLOT(removeAllLarvaeModelsWhichAreShorterThen()));
+    connect(this,                                       SIGNAL(sendShortestLarvaeTrackLength(uint)),        &mLarvaeContainer,                            SLOT(removeShortTracks(uint)));
     
-    connect(this->ui->pbtRemoveAllWhichAreShorterThen,  SIGNAL(clicked()),                              this,                                               SLOT(removeAllLarvaeModelsWhichAreShorterThen()));
-    connect(this,                                       SIGNAL(sendShortestLarvaeTrackLength(uint)),    &this->mLarvaeContainer,                            SLOT(removeShortTracks(uint)));
+    connect(this,                                       SIGNAL(sendMaximumNumberOfTimePoints(int)),         &mLarvaeContainer,                            SLOT(setMaximumNumberOfTimePoints(int)));
     
-    connect(this->ui->tabWidget_images,                 SIGNAL(currentChanged(int)),                    this,                                               SLOT(adjustTimeSlider(int)));
+    connect(ui->tabWidget_images,                 SIGNAL(currentChanged(int)),                        this,                                               SLOT(adjustTimeSlider(int)));
     
-    connect(this->ui->tab_3,                            SIGNAL(sendCurrentPlottingParameter(QString,int)), this,                                            SLOT(adjustPlottingValues(QString,int)));
-    connect(this,                                       SIGNAL(sendAvailableLarvaIDs(QStringList)),     this->ui->tab_3,                                    SLOT(setAvailableLarvaIDs(QStringList)));
-    connect(this,                                       SIGNAL(sendPlottingTimeStemp(int)),             this->ui->tab_3,                                    SLOT(bookmarkCroppedTimeStemp(int)));
-    connect(this,                                       SIGNAL(sendCroppedImage(QImage)),               this->ui->tab_3,                                    SLOT(showCroppedImage(QImage)));
-    connect(this,                                       SIGNAL(sendNewImageSize(QSize)),                this->ui->tab_3,                                    SLOT(setImageSize(QSize)));
-    connect(this->mScene->getLandmarkContainer(),       SIGNAL(sendAllLandmarkNames(QStringList)),      this->ui->tab_3,                                    SLOT(setAvailableLandmarkNames(QStringList)));
+    connect(ui->tab_3,                            SIGNAL(sendCurrentPlottingParameter(QString,int)),  this,                                               SLOT(adjustPlottingValues(QString,int)));
+    connect(this,                                       SIGNAL(sendAvailableLarvaIDs()),                    ui->tab_3,                                    SLOT(setAvailableLarvaIDs()));
+    connect(this,                                       SIGNAL(sendPlottingTimeStemp(int)),                 ui->tab_3,                                    SLOT(bookmarkCroppedTimeStemp(int)));
+    connect(this,                                       SIGNAL(sendCroppedImage(QImage)),                   ui->tab_3,                                    SLOT(showCroppedImage(QImage)));
+    connect(this,                                       SIGNAL(sendNewImageSize(QSize)),                    ui->tab_3,                                    SLOT(setImageSize(QSize)));
+    connect(mScene->getLandmarkContainer(),       SIGNAL(sendAllLandmarkNames(QStringList)),          ui->tab_3,                                    SLOT(setAvailableLandmarkNames(QStringList)));
 }
 
 void ResultsViewer::connectTab(int index)
 {
     // setup Larvatab-connections
-    this->ui->larvaTabWidget->widget(index)->blockSignals(false);
+    ui->larvaTabWidget->widget(index)->blockSignals(false);
     
-    connect(this->ui->larvaTabWidget->widget(index),    SIGNAL(requestCenterOn(qreal, qreal)),      this,                                           SLOT(bringLarvaIntoFocus(qreal, qreal)));
-    connect(this->ui->larvaTabWidget->widget(index),    SIGNAL(sendAmbiguityTimepoint(int)),        this,                                           SLOT(on_horizontalSlider_images_valueChanged(int)));       
-    connect(this,                                       SIGNAL(newTimeStep(uint)),                  this->ui->larvaTabWidget->widget(index),        SLOT(update(uint)));
+    connect(ui->larvaTabWidget->widget(index),    SIGNAL(requestCenterOn(qreal, qreal)),      this,                                           SLOT(bringLarvaIntoFocus(qreal, qreal)));
+    connect(ui->larvaTabWidget->widget(index),    SIGNAL(sendAmbiguityTimepoint(int)),        this,                                           SLOT(on_horizontalSlider_images_valueChanged(int)));       
+    connect(this,                                       SIGNAL(newTimeStep(uint)),                  ui->larvaTabWidget->widget(index),        SLOT(update(uint)));
 }
 
 void ResultsViewer::disconnectTab(int index)
 {
-    this->ui->larvaTabWidget->widget(index)->blockSignals(true);
-    disconnect(this->ui->larvaTabWidget->widget(index),    SIGNAL(requestCenterOn(qreal, qreal)),      this,                                        SLOT(bringLarvaIntoFocus(qreal, qreal)));
-    disconnect(this->ui->larvaTabWidget->widget(index),    SIGNAL(sendAmbiguityTimepoint(int)),        this,                                        SLOT(on_horizontalSlider_images_valueChanged(int)));       
-    disconnect(this,                                       SIGNAL(newTimeStep(uint)),                  this->ui->larvaTabWidget->widget(index),     SLOT(update(uint)));    
+    ui->larvaTabWidget->widget(index)->blockSignals(true);
+    disconnect(ui->larvaTabWidget->widget(index),    SIGNAL(requestCenterOn(qreal, qreal)),      this,                                        SLOT(bringLarvaIntoFocus(qreal, qreal)));
+    disconnect(ui->larvaTabWidget->widget(index),    SIGNAL(sendAmbiguityTimepoint(int)),        this,                                        SLOT(on_horizontalSlider_images_valueChanged(int)));       
+    disconnect(this,                                       SIGNAL(newTimeStep(uint)),                  ui->larvaTabWidget->widget(index),     SLOT(update(uint)));    
 }
 
 void ResultsViewer::resetAndClear()
 {
-    while(this->ui->larvaTabWidget->count() > 0)
+    while(ui->larvaTabWidget->count() > 0)
     {
-        this->removeTabByIndex(0);
+        removeTabByIndex(0);
     }
     
-    this->mCurrentTimestep = 0;
+    mCurrentTimestep = 0;
     
-    this->mFileNames.clear();
-    this->mYmlFileName.clear();
-    this->mUndistFileName.clear();
+    mFileNames.clear();
+    mYmlFileName.clear();
+    mUndistFileName.clear();
     
-    this->mScene->clearScene();
+    mScene->clearScene();
     
-    this->mImgPaths.clear();
+    mImgPaths.clear();
     
-    this->mNumberOfImages = 0;
+    mNumberOfImages = 0;
     
-    this->mPlayingModeOn = false;
-    this->mTimer->stop();
+    mPlayingModeOn = false;
+    mTimer->stop();
     
-    this->mUndistorer.reset();
+    mUndistorer.reset();
     
-    this->loadAllResults();
+    loadAllResults();
 }
 
 void ResultsViewer::removeAllLarvaeModelsWhichAreShorterThen()
@@ -432,18 +375,18 @@ void ResultsViewer::adjustTimeSlider(int tabID)
 {
     if(tabID == 2)
     {
-        this->mPlottingTabVisible = true;
-        
-        this->ui->horizontalSlider_images->setValue(this->mCurrentTimePointForPlotting + 1);
-        this->ui->horizontalSlider_images->setMinimum(this->mTimeIntervalForPlotting.first);
-        this->ui->horizontalSlider_images->setMaximum(this->mTimeIntervalForPlotting.second);
+        mPlottingTabVisible = true;
+        cropImage(mLarvaIDForCropping);   
+        emit sendPlottingTimeStemp(mCurrentTimestep);
     }
     else
     {
-        this->mPlottingTabVisible = false;
-        this->ui->horizontalSlider_images->setMinimum(1);
-        this->ui->horizontalSlider_images->setValue(this->mCurrentTimestep + 1);
-        this->ui->horizontalSlider_images->setMaximum(this->mNumberOfImages);
+        mPlottingTabVisible = false;
+        showImage(mCurrentTimestep);
+        showTable(mCurrentTimestep);
+        
+        updateLarvaeTabs();
+        emit newTimeStep(mCurrentTimestep);
     }
 }
 
@@ -452,24 +395,9 @@ void ResultsViewer::adjustPlottingValues(QString larvaID, int currentTimeStep)
     bool ok;
     int lID = larvaID.toUInt(&ok);
     if(ok)
-    {
-        this->mTimeIntervalForPlotting          = this->mLarvaeContainer.getStartEndTimesteps(lID);
-        this->mCurrentTimePointForPlotting      = currentTimeStep;//this->mTimeIntervalForPlotting.first;
-        this->mTimeIntervalForPlotting.first    += 1;
-        this->mTimeIntervalForPlotting.second   += 1;
-        
-        QString qstr;
-        qstr.append(QString::number(this->mTimeIntervalForPlotting.first));
-        qstr.append("/");
-        qstr.append(QString::number(this->mTimeIntervalForPlotting.second));
-        this->ui->label_imageNumber->setText(qstr);
-        
-        this->ui->horizontalSlider_images->setMinimum(this->mTimeIntervalForPlotting.first);
-        this->ui->horizontalSlider_images->setMaximum(this->mTimeIntervalForPlotting.second);
-        this->ui->horizontalSlider_images->setValue(this->mCurrentTimePointForPlotting+1);
-        
-        this->mLarvaIDForCropping = lID;
-        this->cropImage(this->mLarvaIDForCropping);
+    {        
+        mLarvaIDForCropping = lID;
+        cropImage(mLarvaIDForCropping);
     }
 }
 
@@ -478,74 +406,76 @@ void ResultsViewer::moveSliderSlot(bool forward)
     int position;
     if(forward)
     {
-        position = (this->ui->horizontalSlider_images->value() < this->mNumberOfImages)
-                ? this->ui->horizontalSlider_images->value() : 0;
+        position = (ui->horizontalSlider_images->value() < mNumberOfImages)
+                ? ui->horizontalSlider_images->value() : 0;
         
-        this->ui->horizontalSlider_images->setValue(++position);
+        ui->horizontalSlider_images->setValue(++position);
     }
     else
     {
-        position = (this->ui->horizontalSlider_images->value() > 1)
-                ? this->ui->horizontalSlider_images->value() : this->mNumberOfImages + 1;
+        position = (ui->horizontalSlider_images->value() > 1)
+                ? ui->horizontalSlider_images->value() : mNumberOfImages + 1;
         
-        this->ui->horizontalSlider_images->setValue(--position);
+        ui->horizontalSlider_images->setValue(--position);
     }
 }
 
 void ResultsViewer::bringLarvaIntoFocus(qreal x, qreal y)
 {
-    this->ui->graphicsView->centerOn(x,y);
+    ui->graphicsView->centerOn(x,y);
 }
 
 void ResultsViewer::playPause()
 {
-    if(this->mPlayingModeOn)
+    if(mPlayingModeOn)
     {
-        this->mTimer->stop();
-        this->ui->pbtPlayPause->setIcon(QIcon(":/ResultViewer/Icons/Icons/media-playback-start.png"));
-        this->ui->pbtOneStepPrevTime->setEnabled(true);
-        this->ui->pbtOneStepNextTime->setEnabled(true);
+        mTimer->stop();
+        ui->pbtPlayPause->setIcon(QIcon(":/ResultViewer/Icons/Icons/media-playback-start.png"));
+        ui->pbtOneStepPrevTime->setEnabled(true);
+        ui->pbtOneStepNextTime->setEnabled(true);
     }
     else
     {
-        this->mTimer->start(1000/10);
-        this->ui->pbtPlayPause->setIcon(QIcon(":/ResultViewer/Icons/Icons/media-playback-pause.png"));
-        this->ui->pbtOneStepPrevTime->setEnabled(false);
-        this->ui->pbtOneStepNextTime->setEnabled(false);
+        mTimer->start(1000/10);
+        ui->pbtPlayPause->setIcon(QIcon(":/ResultViewer/Icons/Icons/media-playback-pause.png"));
+        ui->pbtOneStepPrevTime->setEnabled(false);
+        ui->pbtOneStepNextTime->setEnabled(false);
     }
     
-    this->mPlayingModeOn = !this->mPlayingModeOn;
+    mPlayingModeOn = !mPlayingModeOn;
 }
 
 void ResultsViewer::resetView()
 {
     // Reset all lables
-    this->ui->label_imagePath->setText(QString("No image path selected"));
-    this->ui->label_trackingResults->setText(QString("No tracking result selected"));
-    this->ui->label_cameraMatrix->setText(QString("No camera matrix selected"));
-    this->ui->label_imageNumber->setText(QString("0/0"));
-    this->ui->horizontalSlider_images->setValue(1);
-    this->ui->horizontalSlider_images->setMaximum(1);
+    ui->label_imagePath->setText(QString("No image path selected"));
+    ui->label_trackingResults->setText(QString("No tracking result selected"));
+    ui->label_cameraMatrix->setText(QString("No camera matrix selected"));
+    ui->label_imageNumber->setText(QString("0/0"));
+    ui->horizontalSlider_images->setValue(1);
+    ui->horizontalSlider_images->setMaximum(1);
 }
 
 void ResultsViewer::loadAllResults()
 {
-    this->resetView();
+    resetView();
     
-    if(this->loadImageFiles()) 
+    if(loadImageFiles()) 
     {
-        this->mNumberOfImages = mFileNames.size();
+        mNumberOfImages = mFileNames.size();
         
-        if(this->loadYmlFile())
+        if(loadYmlFile())
         {
-            this->mScene->loadROIContainer(this->mYmlFileName);
-            this->mScene->loadLandmarkContainer(this->mYmlFileName);
-            this->initUndistorer();
-            this->setupBaseGUIElements();
-            this->setupLarvaeTabs();
+            mScene->loadROIContainer(mYmlFileName);
+            mScene->loadLandmarkContainer(mYmlFileName);
+            initUndistorer();
+            setupBaseGUIElements();
+            setupLarvaeTabs();
             
-            this->showImage(0);
-            this->showTable(0);
+            showImage(0);
+            showTable(0);
+            
+            emit sendMaximumNumberOfTimePoints(mImgPaths.size());
         }
     }
 }
@@ -553,36 +483,37 @@ void ResultsViewer::loadAllResults()
 bool ResultsViewer::loadImageFiles()
 {
     // 1. Load image files...
-    this->mFileNames.clear();
-    this->mYmlFileName.clear();
-    this->mUseUndist = false;
-    this->mImgPaths.clear();
-    this->mScene->clearScene();
+    mFileNames.clear();
+    mYmlFileName.clear();
+    mUseUndist = false;
+    mImgPaths.clear();
+    mScene->clearScene();
     
-    this->mUndistFileName.clear();
+    mUndistFileName.clear();
     
-    this->mFileNames = QFileDialog::getOpenFileNames(this, tr("Open Image Files"), "", tr("Image Files (*.tif *.tiff)"));
+    mFileNames = QFileDialog::getOpenFileNames(this, tr("Open Image Files"), "", QString::fromStdString(StringConstats::fileFormats));
+    mFileNames.sort();
     
-    return !this->mFileNames.isEmpty();
+    return !mFileNames.isEmpty();
 }
 
 bool ResultsViewer::loadYmlFile()
 {
-    this->mYmlFileName = QFileDialog::getOpenFileName(this, tr("Open Output File"), "", tr("YML File (*.yml)"));
+    mYmlFileName = QFileDialog::getOpenFileName(this, tr("Open Output File"), "", tr("YML File (*.yml)"));
     
-    if (!this->mYmlFileName.isEmpty())
+    if (!mYmlFileName.isEmpty())
     {
-        this->mLarvaeContainer.readLarvae(this->mYmlFileName,
-                                          this->mImgPaths,
-                                          this->mUseUndist);
+        mLarvaeContainer.readLarvae(mYmlFileName,
+                                          mImgPaths,
+                                          mUseUndist);
         
-        if( this->mFileNames.size() != this->mImgPaths.size())
+        if(mFileNames.size() != mImgPaths.size())
         {
             QMessageBox messageBox;
             messageBox.critical(0,"Error", "Number of loaded images do not fit with output file!");
             messageBox.setFixedSize(500,200);
             messageBox.show();
-            this->mLarvaeContainer.removeAllLarvae();
+            mLarvaeContainer.removeAllLarvae();
             return false;
         }
         else
@@ -598,15 +529,15 @@ bool ResultsViewer::loadYmlFile()
 
 void ResultsViewer::initUndistorer()
 {
-    if(this->mUseUndist)
+    if(mUseUndist)
     {
-        this->mUndistFileName = QFileDialog::getOpenFileName(this, tr("Open Distortion File"), "", tr("YAML File (*.yaml)"));
+        mUndistFileName = QFileDialog::getOpenFileName(this, tr("Open Distortion File"), "", tr("YAML File (*.yaml)"));
         
-        if (!this->mUndistFileName.isEmpty())
+        if (!mUndistFileName.isEmpty())
         {
-            QFileInfo fileInfo = QFileInfo(this->mUndistFileName);
-            this->ui->label_cameraMatrix->setText(fileInfo.path());
-            this->mUndistorer.setPath(QtOpencvCore::qstr2str(this->mUndistFileName));
+            QFileInfo fileInfo = QFileInfo(mUndistFileName);
+            ui->label_cameraMatrix->setText(fileInfo.path());
+            mUndistorer.setPath(QtOpencvCore::qstr2str(mUndistFileName));
             
         }
     }
@@ -614,99 +545,80 @@ void ResultsViewer::initUndistorer()
 
 void ResultsViewer::setupBaseGUIElements()
 {
-    QFileInfo fileInfo = QFileInfo(this->mFileNames.at(0));
-    this->ui->label_imagePath->setText(fileInfo.path());
-    fileInfo = QFileInfo(this->mYmlFileName);
-    this->ui->label_trackingResults->setText(fileInfo.path());
+    QFileInfo fileInfo = QFileInfo(mFileNames.at(0));
+    ui->label_imagePath->setText(fileInfo.path());
+    fileInfo = QFileInfo(mYmlFileName);
+    ui->label_trackingResults->setText(fileInfo.path());
     
     QString qstr;
     qstr.append(QString::number(1));
     qstr.append("/");
-    qstr.append(QString::number(this->mNumberOfImages));
-    this->ui->label_imageNumber->setText(qstr);
+    qstr.append(QString::number(mNumberOfImages));
+    ui->label_imageNumber->setText(qstr);
     
-    this->ui->horizontalSlider_images->setValue(1);
-    this->ui->horizontalSlider_images->setMaximum(this->mNumberOfImages);
+    ui->horizontalSlider_images->setValue(1);
+    ui->horizontalSlider_images->setMaximum(mNumberOfImages);
     
-    this->ui->graphicsView->setEnabled(true);
-    this->ui->pbtOneStepPrevTime->setEnabled(true);
-    this->ui->pbtPlayPause->setEnabled(true);
-    this->ui->pbtOneStepNextTime->setEnabled(true);
-    this->ui->larvaTabWidget->setEnabled(true);
-    this->ui->horizontalSlider_images->setEnabled(true);
-    this->ui->tableView->setEnabled(true);
-    this->ui->tabWidget_images->setEnabled(true);
+    ui->graphicsView->setEnabled(true);
+    ui->pbtOneStepPrevTime->setEnabled(true);
+    ui->pbtPlayPause->setEnabled(true);
+    ui->pbtOneStepNextTime->setEnabled(true);
+    ui->larvaTabWidget->setEnabled(true);
+    ui->horizontalSlider_images->setEnabled(true);
+    ui->tableView->setEnabled(true);
+    ui->tabWidget_images->setEnabled(true);
     
-    emit sendAvailableLarvaIDs(this->mLarvaeContainer.getAllLarvaeIDs());
+    emit sendAvailableLarvaIDs();
 }
 
 void ResultsViewer::setupLarvaeTabs()
 {
     // create one tab for each Larva
-    for (int i = 0; i < this->mLarvaeContainer.getNumberOfLarvae(); ++i)
+    for (int i = 0; i < mLarvaeContainer.getNumberOfLarvae(); ++i)
     {
         qsrand(QTime::currentTime().msec());
-        TrackerSceneLarva* tLarva = this->mScene->addLarva(
-                    this->mLarvaeContainer.getLarvaPointer(i), 
+        TrackerSceneLarva* tLarva = mScene->addLarva(
+                    mLarvaeContainer.getLarvaPointer(i), 
                     QColor(qrand() % 256, qrand() % 256, qrand() % 256));
         
-        this->ui->larvaTabWidget->addTab(
+        ui->larvaTabWidget->addTab(
                     new LarvaTab(tLarva, 
-                                 this->mFileNames.size(),
-                                 &this->mLarvaeContainer,
-                                 this->ui->larvaTabWidget),
+                                 mFileNames.size(),
+                                 &mLarvaeContainer,
+                                 ui->larvaTabWidget),
                     tLarva->getID());
         
-        if(this->mLarvaeContainer.getAllTimesteps(this->mLarvaeContainer.getLarvaPointer(i)->getID()).front() > 0)
+        if(mLarvaeContainer.getAllTimesteps(mLarvaeContainer.getLarvaPointer(i)->getID()).front() > 0)
         {
-            this->ui->larvaTabWidget->setTabEnabled(i, false);
+            ui->larvaTabWidget->setTabEnabled(i, false);
         }
         
-        this->connectTab(i);
+        connectTab(i);
     }
 }
 
 void ResultsViewer::addTab()
 {
-    //    qsrand(QTime::currentTime().msec());
-    
-    //    TrackerSceneLarva* tLarva = this->mScene->addLarva(
-    //                this->mLarvaeContainer.createDefaultLarva(this->mCurrentTimestep), 
-    //                QColor(qrand() % 256, qrand() % 256, qrand() % 256));
-    
-    //    this->ui->larvaTabWidget->addTab(
-    //                new LarvaTab(tLarva, 
-    //                             this->mFileNames.size(),
-    //                             &this->mLarvaeContainer,
-    //                             this->ui->larvaTabWidget),
-    //                tLarva->getID());
-    
-    //    if(this->mLarvaeContainer.getAllTimeSteps(tLarva->getID()).front() > 0)
-    //    {
-    //        this->ui->larvaTabWidget->setTabEnabled(this->ui->larvaTabWidget->count() - 1, false);
-    //    }
-    
-    //    this->connectTab(this->ui->larvaTabWidget->count() - 1);
 }
 
 void ResultsViewer::updateLarvaeTabs()
 {
-    QPair<QVector<uint>, QVector<uint> > visibilities = this->mLarvaeContainer.getVisibleLarvaID(this->mCurrentTimestep);
+    QPair<QVector<uint>, QVector<uint> > visibilities = mLarvaeContainer.getVisibleLarvaID(mCurrentTimestep);
     int tabIndex;
     
     foreach(uint i, visibilities.first)
     {
-        if(this->findLarvaTab(i, tabIndex))
+        if(findLarvaTab(i, tabIndex))
         {
-            this->ui->larvaTabWidget->setTabEnabled(tabIndex, true);
+            ui->larvaTabWidget->setTabEnabled(tabIndex, true);
         }
     }
     
     foreach(uint i, visibilities.second)
     {
-        if(this->findLarvaTab(i, tabIndex))
+        if(findLarvaTab(i, tabIndex))
         {
-            this->ui->larvaTabWidget->setTabEnabled(tabIndex, false);
+            ui->larvaTabWidget->setTabEnabled(tabIndex, false);
         }
     }
 }
@@ -714,44 +626,44 @@ void ResultsViewer::updateLarvaeTabs()
 void ResultsViewer::updateLarvaePath(uint larvaID)
 {
     int i;
-    if(this->findLarvaTab(larvaID, i))
+    if(findLarvaTab(larvaID, i))
     {
-        dynamic_cast<LarvaTab*>(this->ui->larvaTabWidget->widget(i))->redrawPaths();
+        dynamic_cast<LarvaTab*>(ui->larvaTabWidget->widget(i))->redrawPaths();
     }
 }
 
 void ResultsViewer::removeTabByLarvaID(uint larvaID)
 {
     int i;
-    if(this->findLarvaTab(larvaID, i))
+    if(findLarvaTab(larvaID, i))
     {
-        dynamic_cast<LarvaTab*>(this->ui->larvaTabWidget->widget(i))->getSceneLarva()->removeFromScene();
-        this->ui->larvaTabWidget->widget(i)->deleteLater();
-        this->disconnectTab(i);
-        this->ui->larvaTabWidget->widget(i)->close();
-        this->ui->larvaTabWidget->removeTab(i);
+        dynamic_cast<LarvaTab*>(ui->larvaTabWidget->widget(i))->getSceneLarva()->removeFromScene();
+        ui->larvaTabWidget->widget(i)->deleteLater();
+        disconnectTab(i);
+        ui->larvaTabWidget->widget(i)->close();
+        ui->larvaTabWidget->removeTab(i);
     }
-    this->updateLarvaPointer();
+    updateLarvaPointer();
 }
 
 void ResultsViewer::removeTabByIndex(int tabIndex)
 {
-    if(tabIndex < this->ui->larvaTabWidget->count())
+    if(tabIndex < ui->larvaTabWidget->count())
     {
-        dynamic_cast<LarvaTab*>(this->ui->larvaTabWidget->widget(tabIndex))->getSceneLarva()->removeFromScene();
-        this->ui->larvaTabWidget->widget(tabIndex)->deleteLater();
-        this->disconnectTab(tabIndex);
-        this->ui->larvaTabWidget->widget(tabIndex)->close();
-        this->ui->larvaTabWidget->removeTab(tabIndex);
+        dynamic_cast<LarvaTab*>(ui->larvaTabWidget->widget(tabIndex))->getSceneLarva()->removeFromScene();
+        ui->larvaTabWidget->widget(tabIndex)->deleteLater();
+        disconnectTab(tabIndex);
+        ui->larvaTabWidget->widget(tabIndex)->close();
+        ui->larvaTabWidget->removeTab(tabIndex);
     }
 }
 
 bool ResultsViewer::findLarvaTab(uint larvaID, int& index)
 {
     QStringList l;
-    for(int i = 0; i < this->ui->larvaTabWidget->count(); ++i)
+    for(int i = 0; i < ui->larvaTabWidget->count(); ++i)
     {
-        l = this->ui->larvaTabWidget->tabText(i).split(" ");
+        l = ui->larvaTabWidget->tabText(i).split(" ");
         if(larvaID == l.value(l.size()-1).toUInt())
         {
             index = i;
@@ -766,12 +678,12 @@ void ResultsViewer::updateLarvaPointer()
 {
     int tabIndex;
     Larva* l;
-    for(int i = 0; i < this->mLarvaeContainer.getNumberOfLarvae(); ++i)
+    for(int i = 0; i < mLarvaeContainer.getNumberOfLarvae(); ++i)
     {
-        l = this->mLarvaeContainer.getLarvaPointer(i);
-        if(this->findLarvaTab(l->getID(), tabIndex))
+        l = mLarvaeContainer.getLarvaPointer(i);
+        if(findLarvaTab(l->getID(), tabIndex))
         {
-            dynamic_cast<LarvaTab *>(this->ui->larvaTabWidget->widget(tabIndex))->setLarvaPointer(l);
+            dynamic_cast<LarvaTab *>(ui->larvaTabWidget->widget(tabIndex))->setLarvaPointer(l);
         }
     }
 }
@@ -780,70 +692,57 @@ void ResultsViewer::saveResultLarvae()
 {    
     
     QVector<TrackerSceneLarva*> larvaVector;
-    for(int i = 0; i < this->ui->larvaTabWidget->count(); ++i)
+    for(int i = 0; i < ui->larvaTabWidget->count(); ++i)
     {
-        larvaVector.push_back(dynamic_cast<LarvaTab*>(this->ui->larvaTabWidget->widget(i))->getSceneLarva());
+        larvaVector.push_back(dynamic_cast<LarvaTab*>(ui->larvaTabWidget->widget(i))->getSceneLarva());
     }
     
-    this->mLarvaeContainer.saveResultLarvae(this->mImgPaths, this->mScene->getSaveImage(larvaVector), this->mUndistorer.isReady(), this->mScene->getROIContainer(), this->mScene->getLandmarkContainer());
-
+    mLarvaeContainer.saveResultLarvae(mImgPaths, mScene->getSaveImage(larvaVector), mUndistorer.isReady(), mScene->getROIContainer(), mScene->getLandmarkContainer());
+    
 }
 
 void ResultsViewer::on_horizontalSlider_images_valueChanged(int value)
 {
-    if(!this->mPlottingTabVisible)
+    QString qstr;
+    qstr.append(QString::number(value));
+    qstr.append("/");
+    qstr.append(QString::number(mNumberOfImages));
+    ui->label_imageNumber->setText(qstr);
+    
+    mCurrentTimestep = value - 1;
+    
+    if(!mPlottingTabVisible)
     {
-        QString qstr;
-        qstr.append(QString::number(value));
-        qstr.append("/");
-        qstr.append(QString::number(this->mNumberOfImages));
-        this->ui->label_imageNumber->setText(qstr);
-        //        this->ui->horizontalSlider_images->setValue(value);
+        showImage(value - 1);
+        showTable(value - 1);
         
-        this->showImage(value - 1);
-        this->showTable(value - 1);
-        
-        this->mCurrentTimestep = value - 1;
-        this->updateLarvaeTabs();
-        emit newTimeStep(this->mCurrentTimestep);
+        updateLarvaeTabs();
+        emit newTimeStep(mCurrentTimestep);
     }
     else
-    {
-        QString qstr;
-        qstr.append(QString::number(value));
-        qstr.append("/");
-        qstr.append(QString::number(this->mTimeIntervalForPlotting.second));
-        this->ui->label_imageNumber->setText(qstr);
-        
-        this->mCurrentTimePointForPlotting = value - 1;
-               
-        this->cropImage(this->mLarvaIDForCropping);
-        
-        emit sendPlottingTimeStemp(this->mCurrentTimePointForPlotting);
+    {       
+        cropImage(mLarvaIDForCropping);   
+        emit sendPlottingTimeStemp(mCurrentTimestep);
     }
 }
 
 void ResultsViewer::goOneTimeStepPrev()
 {
-    this->moveSliderSlot(false);
+    moveSliderSlot(false);
 }
 
 void ResultsViewer::goOneTimeStepNext()
 {
-    this->moveSliderSlot(true);
+    moveSliderSlot(true);
 }
 
 void ResultsViewer::cropImage(uint larvaID)
 {
     Larva l;
-    if (!this->mFileNames.empty() && this->mCurrentTimePointForPlotting < this->mFileNames.size() && this->mLarvaeContainer.getLarva(larvaID, l))
+    if (!mFileNames.empty() && mCurrentTimestep < mFileNames.size() && mLarvaeContainer.getLarvaByID(larvaID, l))
     {
         /* get the selected image fileNames list */
-        cv::Mat img = cv::imread(QtOpencvCore::qstr2str(this->mFileNames.at(this->mCurrentTimePointForPlotting)), 0);
-        
-        this->mImageSize.setWidth(img.size().width);
-        this->mImageSize.setHeight(img.size().height);
-        emit sendNewImageSize(this->mImageSize);
+        cv::Mat img = cv::imread(QtOpencvCore::qstr2str(mFileNames.at(mCurrentTimestep)), 0);
         
         if(mUndistorer.isReady())
         {
@@ -852,9 +751,13 @@ void ResultsViewer::cropImage(uint larvaID)
             tmpImg.copyTo(img);
         }
         
-        cv::Point mom;
-        double spineLength = this->mLarvaeContainer.getMaxSpineLength();
-        if(spineLength > 0.0 && l.getMomentumAt(this->mCurrentTimePointForPlotting, mom))
+        mImageSize.setWidth(img.size().width);
+        mImageSize.setHeight(img.size().height);
+        emit sendNewImageSize(mImageSize);
+        
+        cv::Point mom;        
+        double spineLength = mLarvaeContainer.getMaxSpineLength();
+        if(spineLength > 0.0 && l.getMomentumAt(mCurrentTimestep, mom))
         {
             cv::Rect box;
             
@@ -867,12 +770,12 @@ void ResultsViewer::cropImage(uint larvaID)
                 box.y = 0;
             
             box.width = 2*spineLength;
-            if(box.width > img.cols)
-                box.width = img.cols-1;
+            if(box.x + box.width > img.cols)
+                box.width = img.cols - box.x -1;
             
             box.height = 2*spineLength;
-            if(box.height > img.rows)
-                box.height = img.rows-1;
+            if(box.y + box.height > img.rows)
+                box.height = img.rows - box.y -1;
             
             cv::Mat cImg = cv::Mat::zeros(img.size(), CV_8UC3);
             cv::cvtColor(img,cImg,CV_GRAY2BGR);
@@ -881,7 +784,10 @@ void ResultsViewer::cropImage(uint larvaID)
             
             QImage qimg = QtOpencvCore::img2qimg(cImg);
             emit sendCroppedImage(qimg);
-        }
-        
+        }   
+    }
+    else
+    {
+        emit sendCroppedImage(QImage());
     }
 }

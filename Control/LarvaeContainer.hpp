@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -37,7 +37,8 @@
 #include "Configuration/FIMTrack.hpp"
 
 //#include <QtCore>
-//#include <QtGui>
+#include <QFileDialog>
+#include <list>
 
 #include "Data/Larva.hpp"
 #include "InputGenerator.hpp"
@@ -53,67 +54,75 @@ class LarvaeContainer : public QObject
 private:
     std::vector < Larva >                       mLarvae;
     double                                      mMaxSpineLength;
+    int                                         mMaximumNumberOfTimePoints;
     
     uint getLastValidLavaID() const;
     
-    double calcMomentumDist(uint larvaIndex, 
-                            uint timePoint, 
+    double calcMomentumDist(const uint larvaIndex, 
+                            const uint timePoint, 
                             cv::Point const & curMomentum) const;
     
-    void changeDirection(uint larvaIndex, uint timePoint);
-    void eraseAt(uint larvaIndex, uint timePoint);
+    void changeDirection(const uint larvaIndex, const uint timePoint);
+    void eraseAt(const uint larvaIndex, const uint timePoint);
     
-    double calcDistToOrigin(uint larvaIndex, 
+    double calcDistToOrigin(const uint larvaIndex, 
                             cv::Point const & curMomentum) const;
 
-    int calcGoPhaseIndicator(uint larvaIndex,
+    int calcGoPhaseIndicator(const uint larvaIndex,
                              uint const timePoint,
                              cv::Point const & curMomentum,
                              double const curBending,
                              uint const velocityThresh,
                              uint const bendingThresh,
                              uint const timeWindow);
-    double calcMovementDirection(uint larvaIndex, 
+    double calcMovementDirection(const uint larvaIndex, 
                                  uint const timePoint,
                                  uint const timeWindow,
                                  cv::Point const & curMomentum);
+    int calcHeadTailRecognitionIndicator1(const uint larvaIndex,
+                               const uint from,
+                               const uint to);
+    int calcHeadTailRecognitionIndicator2(const uint larvaIndex,
+                                          const uint from,
+                                          const uint to);
 
-    bool changeDirectionality(uint larvaIndex, uint timePoint, RawLarva const & rawlarva);
+    bool changeDirectionality(const uint larvaIndex, const uint timePoint, RawLarva const & rawlarva);
     template<class T> std::vector<T> reverseVec(std::vector<T> const & v);
     
     
-    bool getIndexOfLarva(uint id, size_t &index) const;
-    spineType calcSpine(QPainterPath const& spinePath);
+    bool getIndexOfLarva(const uint id, size_t &index) const;
+    FIMTypes::spine_t calcSpine(QPainterPath const& spinePath);
     
-    void updateLarvaSpine(int index, uint time, QPainterPath const& paintSpine, const std::vector<double> &radii);
-    void updateLarvaMomentum(int index, uint time, QPolygonF const& paintPolygon);
-    void updateLarvaArea(int index, uint time, QPolygonF const& paintPolygon);
-    void updateLarvaPerimeter(int index, uint time, QPolygonF const& paintPolygon);
-    void updateLarvaDistance2Origin(int index);
-    void updateLarvaAccumulatedDistance(int index);
-    void updateIsCoiledIndicator(int index, uint time);
+    void updateLarvaSpine(const int index, const uint time, QPainterPath const& paintSpine, const std::vector<double> &radii);
+    void updateLarvaMomentum(const int index, const uint time, QPolygonF const& paintPolygon);
+    void updateLarvaArea(const int index, const uint time, QPolygonF const& paintPolygon);
+    void updateLarvaPerimeter(const int index, const uint time, QPolygonF const& paintPolygon);
+    void updateLarvaDistance2Origin(const int index);
+    void updateLarvaAccumulatedDistance(const int index);
+    void updateIsCoiledIndicator(const int index, const uint time);
     
-    void updateGoPhaseIndicator(int index, uint time);
-    void updateTurnIndicator(int index, uint time);
+    void updateGoPhaseIndicator(const int index, const uint time);
+    void updateTurnIndicator(const int index, const uint time);
     bool calcLeftTurnIndicator(const double curBending, const uint bendingThresh);
     bool calcRightTurnIndicator(const double curBending, const uint bendingThresh);
-    void updateMovementDirection(int index, uint time);
+    void updateMovementDirection(const int index, const uint time);
     
-    void recalculateLarvaDistanceParameter(uint larvaID);
-    void recalculateLarvaDistanceToOrigin(size_t larvaIndex);
-    void recalculateLarvaMomentumDistance(size_t larvaIndex);
-    void recalculateLarvaVelocityAndAcceleration(size_t larvaIndex);
-    void recalculateLarvaAcceleration(size_t larvaIndex);
+    void recalculateLarvaDistanceParameter(const uint larvaID);
+    void recalculateLarvaDistanceToOrigin(const size_t larvaIndex);
+    void recalculateLarvaMomentumDistance(const size_t larvaIndex);
+    void recalculateLarvaVelocityAndAcceleration(const size_t larvaIndex);
+    void recalculateLarvaAcceleration(const size_t larvaIndex);
     
     void calcLandmarkParameter(QString const& name, QPointF const& p);
     void calcLandmarkParameter(QString const& name, QLineF const& l);
     void calcLandmarkParameter(QString const& name, QRectF const& r, const bool ellipse);
-    void calcBearinAngle(QString const& name, QPointF const& landmarkPoint);
+    void calcBearingAngle(QString const& name, QPointF const& landmarkPoint);
+    void calcBearingAngle(const QString &name, const QLineF &l);
     
 public:
     explicit LarvaeContainer(QObject *parent = 0);
     
-    Larva* createDefaultLarva(uint timeStep);
+    Larva* createDefaultLarva(const uint timeStep);
     
     /**
      * @brief createNewLarva function to initialize a larva with a given time point.
@@ -124,15 +133,15 @@ public:
      * @param rawLarva contains the uprocessed raw larva and is used to calculate all larval parameters
      * @param larvaID specifies the unique ID of this larval object
      */
-    void createNewLarva(uint timePoint, RawLarva const & rawLarva, unsigned int larvaID);
+    void createNewLarva(const uint timePoint, RawLarva const & rawLarva, unsigned int larvaID);
     
     /**
      * @brief insert is used to add new measurements (given by rawLarva) to this larva at a given time point
      * @param timePoint the given time point (for the parameters map)
      * @param rawLarva contains all raw larval values (i.e. features; e.g. the contour).
      */
-    void insertRawLarva(uint larvaID, 
-                        uint timePoint, 
+    void insertRawLarva(const uint larvaID, 
+                        const uint timePoint, 
                         RawLarva const & rawLarva);
     
     /**
@@ -140,7 +149,7 @@ public:
      *
      * This is a post-processing step, which is called after the whole video is processed.
      */
-    void interpolateHeadTailOverTime(uint larvaIndex);
+    void interpolateHeadTailOverTime(const uint larvaIndex);
     void interpolateHeadTailOverTime();
     
     /**
@@ -155,19 +164,17 @@ public:
      * the current frame and 10 frames in the past, which leads to gaps in the beginning of the
      * movie).
      */
-    void fillTimeSamplingGaps(uint larvaIndex);
+    void fillTimeSamplingGaps(const uint larvaIndex);
     void fillTimeSamplingGaps();
+    void updateLarvaParameterAfterHeadTailInterpolation();
     
     /**
      * @brief isAssignedAt returns true if this larva is assigned for the given time point
      * @param timePoint time point to check existence of this larva
      * @return true if the larva exists for this time point, false otherwise
      */
-    bool isAssignedAt(uint larvaID, uint timePoint) const;
+    bool isAssignedAt(const uint larvaID, const uint timePoint) const;
     
-//    void assign(uint timePoint, double const minDist, const std::vector<RawLarva> &curRawLarvae);
-//    std::map<uint, double> findMatches(RawLarva const & rawLarva, double const minDist, uint const curTimePoint);
-//    void assignMatches2Larva(std::map<size_t ,double> matches, double const minDist, RawLarva const & rawLarva, uint timePoint);
     void interplolateLarvae();
     
     void readLarvae(QString const& ymlFileName, 
@@ -176,31 +183,33 @@ public:
     
     QPair<QVector<uint>, QVector<uint> > getVisibleLarvaID(uint time);
     
-    QStringList getAllTimestepsBefore(uint id, uint time);
-    QStringList getAllTimestepsAfter(uint id, uint time);
-    QStringList getAllContemplableLarvaeIDsForAttach(uint id);
+    QStringList getAllTimestepsBefore(const uint id, const uint time);
+    QStringList getAllTimestepsAfter(const uint id, const uint time);
+    QStringList getAllContemplableLarvaeIDsForAttach(const uint id);
     
-    void invertLarva(uint larvaID, uint currentTime, uint toTime);
+    void invertLarva(const uint larvaID, const uint currentTime, const uint toTime);
     
-    void attachToLarva(uint toLarvaID, uint fromLarvaID);
+    void attachToLarva(const uint toLarvaID, const uint fromLarvaID);
     
-    bool copyModel2PrevTimeStep(uint larvaID, uint currentTime);
-    bool copyModel2NextTimeStep(uint larvaID, uint currentTime);
+    bool copyModel2PrevTimeStep(const uint larvaID, const uint currentTime);
+    bool copyModel2NextTimeStep(const uint larvaID, const uint currentTime);
     
-    bool eraseLarvaAt(uint larvaID, uint time);
-    bool eraseLarva(uint larvaID);
+    bool eraseLarvaAt(const uint larvaID, const uint time);
+    bool eraseLarva(const uint larvaID);
     
     void saveResultLarvae(const std::vector<std::string> &imgPaths, 
                           QImage const& img,
                           const bool useUndist, 
                           RegionOfInterestContainer const* ROIContainer = NULL,
                           LandmarkContainer const* landmarkContainer = NULL);
+
+    void processUntrackedLarvae(const uint timePoint);
     
     /// Getter
     std::vector< Larva > getAllLarvae() const {return this->mLarvae;}
     QStringList getAllLarvaeIDs() const;
     int getNumberOfLarvae() const {return this->mLarvae.size();}
-    Larva* getLarvaPointer(unsigned int index)
+    Larva* getLarvaPointer(const unsigned int index)
     {
         if(index < this->mLarvae.size())
         {
@@ -214,38 +223,48 @@ public:
     bool hasLoadedLarvae() const {return !this->mLarvae.empty();}
     bool isEmpty() const  {return this->mLarvae.empty();}
     bool getLarva(const uint index, Larva& l);
+    bool getLarvaByID(uint larvaID, Larva& l);
     
-    std::vector<uint>   getAllTimesteps(uint larvaID);
-    QPair<int, int>     getStartEndTimesteps(uint larvaID);
-    std::vector< int >  getAllValidLarvaeIDS(uint timePoint);
+    std::vector<uint>   getAllTimesteps(const uint larvaID);
+    QPair<int, int>     getStartEndTimesteps(const uint larvaID);
+    std::vector< int >  getAllValidLarvaeIDS(const uint timePoint);
     
-    bool getSpineMidPointIndex(uint larvaID, uint &index) const;
+    bool larvaHasPointInContour(uint const timePoint, const uint larvaID, FIMTypes::contour_t const & rawLarvaContour);
+    
+    /**************** GETTER **********************/
+    bool getSpineMidPointIndex(const uint larvaID, uint &index) const;
     bool getSpinePointAt(const uint larvaID, const uint timePoint, const uint index, cv::Point &spinePoint) const;
+    bool getSpineAt(const uint larvaID, const uint timePoint, FIMTypes::spine_t &spine) const;
     bool getAccDistAt(const uint larvaID, const uint timePoint, double & retAccDist);
     bool getDistToOriginAt(const uint larvaID, const uint timePoint, double & retDistToOrigin);
     bool getIsCoiledIndicatorAt(const uint larvaID, uint const timePoint, bool & retIsCoiledIndicator);
+    bool getIsWellOrientedAt(const uint larvaID, uint const timePoint, bool & retIsWellOriented);
     bool getMomentumAt(const uint larvaID, const uint timePoint, cv::Point & retMomentum) const;
+    bool getAreaAt(const uint larvaID, const uint timePoint, double & retArea) const;
+    bool getSpineLengthAt(const uint larvaID, const uint timePoint, double & retSpineLength) const;
+    bool getContour(const uint larvaID, FIMTypes::contour_t& contour) const;
     
     /***************** For Plotting **********************/
-    QVector<cv::Point>          getAllMomentumValues(uint larvaID);
-    QVector<double>             getAllAreaValues(uint larvaID);
-    QVector<double>             getAllMainBodybendingAngle(uint larvaID);
-    QVector<double>             getAllCoiledIndicator(uint larvaID);
-    QVector<double>             getAllPerimeter(uint larvaID);
-    QVector<double>             getAllDistanceToOrigin(uint larvaID);
-    QVector<double>             getAllMomentumDistance(uint larvaID);
-    QVector<double>             getAllAccumulatedDistance(uint larvaID);
-    QVector<double>             getAllGoPhaseIndicator(uint larvaID);
-    QVector<double>             getAllLeftBendingIndicator(uint larvaID);
-    QVector<double>             getAllRightBendingIndicator(uint larvaID);
-    QVector<double>             getAllMovementDirection(uint larvaID);
-    QVector<double>             getAllDistancesToLandmark(uint larvaID, QString const& landmarkID);
-    QVector<double>             getAllBearingAnglesToLandmark(uint larvaID, QString const& landmarkID);
-    QVector<double>             getVelocity(uint larvaID);
-    QVector<double>             getAcceleration(uint larvaID);
+    QVector<cv::Point>          getAllMomentumValues(const uint larvaID);
+    QVector<double>             getAllAreaValues(const uint larvaID);
+    QVector<double>             getAllMainBodybendingAngle(const uint larvaID);
+    QVector<double>             getAllCoiledIndicator(const uint larvaID);
+    QVector<double>             getAllIsWellOriented(const uint larvaID);
+    QVector<double>             getAllPerimeter(const uint larvaID);
+    QVector<double>             getAllDistanceToOrigin(const uint larvaID);
+    QVector<double>             getAllMomentumDistance(const uint larvaID);
+    QVector<double>             getAllAccumulatedDistance(const uint larvaID);
+    QVector<double>             getAllGoPhaseIndicator(const uint larvaID);
+    QVector<double>             getAllLeftBendingIndicator(const uint larvaID);
+    QVector<double>             getAllRightBendingIndicator(const uint larvaID);
+    QVector<double>             getAllMovementDirection(const uint larvaID);
+    QVector<double>             getAllDistancesToLandmark(const uint larvaID, QString const& landmarkID);
+    QVector<double>             getAllBearingAnglesToLandmark(const uint larvaID, QString const& landmarkID);
+    QVector<double>             getVelocity(const uint larvaID);
+    QVector<double>             getAcceleration(const uint larvaID);
     
-    QVector<double>             getAllTimestepsForPlotting(uint larvaID);
-    QVector<QVector<double> >   getAllTimestepGaps(uint larvaID);
+    QVector<double>             getAllTimestepsForPlotting(const uint larvaID);
+    QVector<QVector<double> >   getAllTimestepGaps(const uint larvaID);
     
 signals:
     void sendLarvaModelDeleted();
@@ -259,9 +278,11 @@ public slots:
     void removeAllLarvae();
     
     void updateLandmark(const Landmark *l);
-    void removeLandmark(QString name);
+    void removeLandmark(const QString name);
     
-    void removeShortTracks(uint minTrackLenght);
+    void removeShortTracks(const uint minTrackLenght);
+    
+    void setMaximumNumberOfTimePoints(const int maxTimePoints);
     
 };
 

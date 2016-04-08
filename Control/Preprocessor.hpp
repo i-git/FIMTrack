@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -41,17 +41,14 @@
 #include "Configuration/FIMTrack.hpp"
 #include "Control/Backgroundsubtractor.hpp"
 
-typedef std::vector<cv::Point> contourType;
-typedef std::vector<contourType> contoursType;
+#include <QMessageBox>
 
 /**
  * @brief The Preprocessor class is used to process images and calculate contours from images.
  */
 class Preprocessor
 {
-public:
-    Preprocessor();
-
+public:  
     /**
      * @brief preprocessPreview calculates all contours necessary for preview. The image (src) is thresholded and the resultant binary
      * image is used to calculate the contours. All contours < minSizeThresh or > maxSizeThresh are removed.
@@ -62,22 +59,24 @@ public:
      * @param maxSizeThresh the maximal size for contour size thresholding
      * @return all contours of sufficient size
      */
-    static contoursType & preprocessPreview2(cv::Mat const & src,
-                                             contoursType & acceptedContoursDst,
-                                             contoursType & biggerContoursDst,
-                                             int const gThresh,
-                                             int const minSizeThresh,
-                                             int const maxSizeThresh);
-
-    static contoursType & preprocessTracking2(cv::Mat const & src,
-                                                      contoursType & acceptedContoursDst,
-                                                      contoursType & biggerContoursDst,
-                                                      int const gThresh,
-                                                      int const minSizeThresh,
-                                                      int const maxSizeThresh,
-                                                      Backgroundsubtractor const & bs);
-
+    static void preprocessPreview(cv::Mat const & src,
+                                  contours_t & acceptedContoursDst,
+                                  contours_t & biggerContoursDst,
+                                  int const gThresh,
+                                  int const minSizeThresh,
+                                  int const maxSizeThresh);
+    
+    static void preprocessTracking(cv::Mat const & src,
+                                   contours_t & acceptedContoursDst,
+                                   contours_t & biggerContoursDst,
+                                   int const gThresh,
+                                   int const minSizeThresh,
+                                   int const maxSizeThresh,
+                                   Backgroundsubtractor const & bs,
+                                   bool checkRoiBorders);
+    
 private:
+    Preprocessor();
     /**
      * @brief graythresh calculates a binary image from src (8UC1) and stores it in dst (all pixel > thresh are set to 255)
      * @param src the input image (8U grayscale)
@@ -85,20 +84,18 @@ private:
      * @param dst the output binary image (in {0,255})
      * @return the dst output binary image
      */
-    static cv::Mat & graythresh(cv::Mat const & src,
-                            int const thresh,
-                            cv::Mat & dst);
-
+    static void graythresh(cv::Mat const & src,
+                           int const thresh,
+                           cv::Mat & dst);
+    
     /**
      * @brief calcContours calculates and returns the contours in an image
      * @param src input (binary 8UC1) image
      * @param contours container with several contours
      * @return the calculated contours
      */
-    static contoursType & calcContours(cv::Mat const & src, contoursType & contours);
-
-    static contoursType & calcPreviewContours(cv::Mat const & src, contoursType & contours);
-
+    static void calcContours(cv::Mat const & src, contours_t & contours);
+    
     /**
      * @brief sizethreshold removes all contours < minSizeThresh and > maxSizeThresh from the given contoursSrc
      * and stores the results in contoursDst.
@@ -108,15 +105,21 @@ private:
      * @param contoursDst resultant reduced set of contours
      * @return reduced set of contours
      */
-    static contoursType & sizethreshold(contoursType const & contoursSrc,
-                                        int const minSizeThresh,
-                                        int const maxSizeThresh,
-                                        contoursType & correctContoursDst,
-                                        contoursType & biggerContoursDst);
-
-    //    static Mat & medianblur(Mat const & src, Mat & dst);
-    //    static Mat & erodecircle(Mat const & src, Mat & dst);
-    //    static Mat & dilatecircle(Mat const & src, Mat & dst);
+    static void sizethreshold(contours_t const & contoursSrc,
+                              int const minSizeThresh,
+                              int const maxSizeThresh,
+                              contours_t & correctContoursDst,
+                              contours_t & biggerContoursDst);
+    
+    /**
+     * @brief roiRestriction checks the contours against the image borders and a user-selected region of interest
+     *        and excludes every contour that does not lie entirely within image/ROI by checking its convex hull.
+     *
+     * @param contours input and output set of contours
+     * @param img CV_8UC1 original image with the user-selected region of interest marked with non-zeros pixels
+     * @param checkRoiBorders indicates if a ROI was selected by the user
+     */
+    static void borderRestriction(contours_t &contours, const cv::Mat &img, bool checkRoiBorders);
 };
 
 #endif // PREPROCESSOR_HPP

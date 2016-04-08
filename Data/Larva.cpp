@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -47,7 +47,7 @@ void Larva::setParameters(const std::map<unsigned int, ValuesType> &parameters)
     this->parameters = parameters;
 }
 
-bool Larva::setSpineAt(const unsigned int timePoint, spineType const& spine)
+bool Larva::setSpineAt(const unsigned int timePoint, FIMTypes::spine_t const& spine)
 {
     map<unsigned int, ValuesType>::iterator it;
     bool exists = false;
@@ -112,7 +112,7 @@ void Larva::invert(uint time)
     {
         cv::Point p1;
         cv::Point p2;
-        spineType spine = this->parameters[time].spine;
+        FIMTypes::spine_t spine = this->parameters[time].spine;
         
         for(size_t i = 0; i < spine.size() / 2; ++i)
         {
@@ -139,7 +139,7 @@ int Larva::getXorY(const Point &pt, unsigned int dimension) const
 }
 
 // getter methods
-bool Larva::getSpineAt(unsigned int const timePoint, spineType & retSpine) const
+bool Larva::getSpineAt(unsigned int const timePoint, FIMTypes::spine_t & retSpine) const
 {
     map<unsigned int, ValuesType>::const_iterator cIt;
     bool exists = false;
@@ -154,6 +154,18 @@ bool Larva::getSpineAt(unsigned int const timePoint, spineType & retSpine) const
     return exists;
 }
 
+bool Larva::getSpineMidPointAt(const unsigned int timePoint, Point& retSpineMidPoint) const
+{
+    FIMTypes::spine_t spine;
+    if(getSpineAt(timePoint, spine))
+    {
+        uint midPointIndex = getSpineMidPointIndex();
+        retSpineMidPoint = spine.at(midPointIndex);
+        return true;
+    }
+    return false;
+}
+
 bool Larva::getMomentumAt(const unsigned int timePoint, Point & retMomentum) const
 {
     map<unsigned int, ValuesType>::const_iterator cIt;
@@ -163,6 +175,36 @@ bool Larva::getMomentumAt(const unsigned int timePoint, Point & retMomentum) con
     if(cIt != parameters.end())
     {
         retMomentum = cIt->second.momentum;
+        exists = true;
+    }
+    
+    return exists;
+}
+
+bool Larva::getHeadAt(const unsigned int timePoint, Point& retHead) const
+{
+    map<unsigned int, ValuesType>::const_iterator cIt;
+    bool exists = false;
+    
+    cIt = parameters.find(timePoint);
+    if(cIt != parameters.end())
+    {
+        retHead = cIt->second.spine.front();
+        exists = true;
+    }
+    
+    return exists;
+}
+
+bool Larva::getTailAt(const unsigned int timePoint, Point& retTail) const
+{
+    map<unsigned int, ValuesType>::const_iterator cIt;
+    bool exists = false;
+    
+    cIt = parameters.find(timePoint);
+    if(cIt != parameters.end())
+    {
+        retTail = cIt->second.spine.back();
         exists = true;
     }
     
@@ -190,7 +232,7 @@ bool Larva::getVelosityAt(const unsigned int timePoint, double &retVelosity) con
     bool exists = false;
     
     cIt = parameters.find(timePoint);
-    if(cIt != parameters.end() /*&& cIt->second.velosity != std::numeric_limits<double>::min()*/)
+    if(cIt != parameters.end())
     {
         retVelosity = cIt->second.velosity;
         exists = true;
@@ -253,6 +295,21 @@ bool Larva::getIsCoiledIndicatorAt(const unsigned int timePoint, bool &retIsCoil
     if(cIt != parameters.end())
     {
         retIsCoiledIndicator = cIt->second.isCoiled;
+        exists = true;
+    }
+    
+    return exists;
+}
+
+bool Larva::getIsWellOrientedAt(const unsigned int timePoint, bool &retIsWellOriented) const
+{
+    map<unsigned int, ValuesType>::const_iterator cIt;
+    bool exists = false;
+    
+    cIt = parameters.find(timePoint);
+    if(cIt != parameters.end())
+    {
+        retIsWellOriented = cIt->second.isWellOriented;
         exists = true;
     }
     
@@ -553,6 +610,20 @@ string Larva::getStrIsCoiledIndicator(const unsigned int timePoint) const
     if(getIsCoiledIndicatorAt(timePoint,isCoiled))
     {
         if(isCoiled)
+            ss << 1;
+        else
+            ss << 0;
+    }
+    return ss.str();
+}
+
+string Larva::getStrIsWellOriented(const unsigned int timePoint) const
+{
+    std::stringstream ss;
+    bool isWellOriented;
+    if(getIsWellOrientedAt(timePoint,isWellOriented))
+    {
+        if(isWellOriented)
             ss << 1;
         else
             ss << 0;

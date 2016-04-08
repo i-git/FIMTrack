@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -37,12 +37,9 @@
 #include <iterator>
 #include <fstream>
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QString>
 #include <QStringList>
 #include <QDateTime>
-#pragma clang diagnostic pop
 
 #include <map>
 #include <string>
@@ -61,41 +58,36 @@ class OutputGenerator
 {
     
 public:
-
-    static void writeMatrices(std::string const& path, 
-                              cv::Mat const& cameraMatrix, 
-                              cv::Mat const& distCoeffs, 
-                              cv::Size const& imageSize);
     
     static void saveConfiguration(std::string const& path);
-
-    static void writePoints(std::string const& path, 
-                            std::vector<cv::Point> const& points);
-
-    static void writeLarvaeInverted(std::string const& path, 
-                                    std::vector<Larva> const & larvae, 
-                                    unsigned int movieLength, 
-                                    LandmarkContainer const* landmarkContainer = NULL);
     
-    static void writeOutputLarva(std::string const & path, 
-                                 std::vector<Larva> const& larvae, 
-                                 std::vector<std::string> const& imgPaths, 
-                                 const bool useUndist,
-                                 RegionOfInterestContainer const* RIOContainer = NULL,
-                                 LandmarkContainer const* landmarkContainer = NULL);
-
-    static void drawTrackingResults(std::string const &trackImgPath,
-                                    std::vector<std::string> const & imgPaths,
-                                    std::vector<Larva> const & larvae);
-
-    static void drawTrackingResultsNoNumbers(std::string const &trackImgPath,
-                                             std::vector<std::string> const & imgPaths,
-                                             std::vector<Larva> const & larvae);
+    static void writePoints(std::string const& path,
+                            std::vector<cv::Point> const& points);
+    
+    static void writeCSVFile(std::string const& path,
+                             std::vector<Larva> const& larvae,
+                             size_t movieLength,
+                             LandmarkContainer const* landmarkContainer = nullptr);
+    
+    static void writeYMLFile(std::string const& path,
+                             std::vector<Larva> const& larvae,
+                             std::vector<std::string> const& imgPaths,
+                             const bool useUndist,
+                             RegionOfInterestContainer const* RIOContainer = nullptr,
+                             LandmarkContainer const* landmarkContainer = nullptr);
+    
+    static void drawTrackingResults(std::string const& trackImgPath,
+                                    std::vector<std::string> const& imgPaths,
+                                    std::vector<Larva> const& larvae);
+    
+    static void drawTrackingResultsNoNumbers(std::string const& trackImgPath,
+                                             std::vector<std::string> const& imgPaths,
+                                             std::vector<Larva> const& larvae);
     
     static void saveResultImage(QString const& path, QImage const& img);
-
+    
 private:
-    static bool getTimeIntervall(std::vector<Larva> const& larvae, std::pair<int, int> &timeInterval);
+    static bool getTimeIntervall(std::vector<Larva> const& larvae, std::pair<int, int>& timeInterval);
     static uint getMinimumNumberOfSpinePoints(std::vector<Larva> const& larvae);
 };
 

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -40,136 +40,143 @@ Preprocessor::Preprocessor()
 {
 }
 
-Mat & Preprocessor::graythresh(Mat const & src,
-                                      int const thresh,
-                                      Mat & dst)
+void Preprocessor::graythresh(Mat const & src,
+                              int const thresh,
+                              Mat & dst)
 {
-    threshold(src,dst,thresh,255,THRESH_BINARY);
-    return dst;
+    threshold(src, dst, thresh, 255.0, THRESH_BINARY);
 }
 
-contoursType & Preprocessor::calcContours(Mat const & src, contoursType & contours)
+void Preprocessor::calcContours(Mat const & src, contours_t & contours)
 {
-    findContours(src, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE, Point());
-
-    return contours;
+    findContours(src, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_NONE);
 }
 
-contoursType & Preprocessor::calcPreviewContours(cv::Mat const & src, contoursType & contours)
-{
-    findContours(src, contours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE, Point());
-
-    return contours;
-}
-
-contoursType &Preprocessor::sizethreshold(const contoursType &contoursSrc, const int minSizeThresh, const int maxSizeThresh, contoursType &correctContoursDst, contoursType &biggerContoursDst)
+void Preprocessor::sizethreshold(const contours_t &contoursSrc, const int minSizeThresh, const int maxSizeThresh, contours_t &correctContoursDst, contours_t &biggerContoursDst)
 {
     correctContoursDst.clear();
     biggerContoursDst.clear();
-
+    
     // iterate over all contours
-    for(contoursType::const_iterator it = contoursSrc.begin(); it != contoursSrc.end(); ++it)
+    for(auto const& c : contoursSrc)
     {
         // calculate the current size of the contour area
-        double current_size = cv::contourArea((*it));
+        double current_size = cv::contourArea(c);
+        
         // check the size (maxSizeThresh > current_size > minSizeThresh)
         if(current_size <= maxSizeThresh && current_size > minSizeThresh)
         {
-            correctContoursDst.push_back(*it);
+            correctContoursDst.push_back(c);
         }
         else if(current_size > maxSizeThresh)
         {
-            biggerContoursDst.push_back(*it);
+            biggerContoursDst.push_back(c);
         }
     }
-
-    // return the contours vector
-    return correctContoursDst;
 }
 
-contoursType &Preprocessor::preprocessPreview2(const Mat &src,
-                                               contoursType &acceptedContoursDst,
-                                               contoursType &biggerContoursDst,
-                                               const int gThresh,
-                                               const int minSizeThresh,
-                                               const int maxSizeThresh)
+void Preprocessor::borderRestriction(contours_t &contours, const Mat& img, bool checkRoiBorders)
+{
+    contours_t validContours;
+    validContours.reserve(contours.size());
+    
+    for(auto const& contour : contours)
+    {
+        cv::Rect rect = cv::boundingRect(contour);
+        
+        // necessity of extending the rect by 2 pixels, because findContours returns
+        // contours that have at least 1 pixel distance to image-borders
+        int x1 = rect.x - 2;
+        int y1 = rect.y - 2;
+        int x2 = rect.x + rect.width + 2;
+        int y2 = rect.y + rect.height + 2;
+        
+        // at first: check, if bounding-rect outside of the images range
+        if(x1 < 0 || y1 < 0 || x2 >= img.cols || y2 >= img.rows)
+        {
+            continue;
+        }
+        
+        bool valid = true;
+        if(checkRoiBorders)
+        {
+            // at second: check, if convex-hull not within ROI
+            FIMTypes::contour_t convexHull;
+            cv::convexHull(contour, convexHull);
+            
+            // for every point of the convex hull ...
+            foreach(cv::Point p, convexHull)
+            {
+                // check, if at least one of the four neighbours lies outside the ROI
+                if(img.at<uchar>(p.y-1,p.x-1) == 0
+                        || img.at<uchar>(p.y+1,p.x-1) == 0
+                        || img.at<uchar>(p.y-1,p.x+1) == 0
+                        || img.at<uchar>(p.y+1,p.x+1) == 0)
+                {
+                    valid = false;
+                    break;
+                }
+            }
+        }
+        
+        // at this point, check if contour is valid
+        if(valid)
+        {
+            validContours.push_back(contour);
+        }
+    }
+    contours = validContours;
+}
+
+void Preprocessor::preprocessPreview(const Mat &src,
+                                     contours_t &acceptedContoursDst,
+                                     contours_t &biggerContoursDst,
+                                     const int gThresh,
+                                     const int minSizeThresh,
+                                     const int maxSizeThresh)
 {
     // generate a scratch image
-    Mat tmpImg = Mat::zeros(src.size().height, src.size().width, src.type());
+    Mat tmpImg = Mat::zeros(src.size(), src.type());
+    
     // generate a contours container scratch
-    contoursType contours;
+    contours_t contours;
+    
     // perform gray threshold
     Preprocessor::graythresh(src,gThresh,tmpImg);
-    // calculate the contours
-    Preprocessor::calcPreviewContours(tmpImg,contours);
-    // filter the contours
-    Preprocessor::sizethreshold(contours, minSizeThresh, maxSizeThresh, acceptedContoursDst, biggerContoursDst);
-
-    // return the filtered contours
-    return acceptedContoursDst;
-}
-
-contoursType &Preprocessor::preprocessTracking2(Mat const & src,
-                                                        contoursType & acceptedContoursDst,
-                                                        contoursType & biggerContoursDst,
-                                                        int const gThresh,
-                                                        int const minSizeThresh,
-                                                        int const maxSizeThresh,
-                                                        Backgroundsubtractor const & bs)
-{
-    // generate a scratch image
-    Mat tmpImg = Mat::zeros(src.size().height, src.size().width, src.type());
-
-//    bs.substract(src,tmpImg);
-    bs.subtractViaThresh(src,gThresh,tmpImg);
-
-    // generate a contours container scratch
-    contoursType contours;
-    // perform gray threshold
-    Preprocessor::graythresh(tmpImg,gThresh,tmpImg);
+    
     // calculate the contours
     Preprocessor::calcContours(tmpImg,contours);
-
+    
     // filter the contours
     Preprocessor::sizethreshold(contours, minSizeThresh, maxSizeThresh, acceptedContoursDst, biggerContoursDst);
-
-    // return the filtered contours
-    return acceptedContoursDst;
 }
 
-
-//Mat & Preprocessor::medianblur(Mat const & src, Mat & dst)
-//{
-//    medianBlur(src,dst,3);
-//    return dst;
-//}
-
-//Mat & Preprocessor::erodecircle(Mat const & src, Mat & dst)
-//{
-//    int elementData[] = {0,1,1,1,0,
-//                         1,1,1,1,1,
-//                         1,1,1,1,1,
-//                         1,1,1,1,1,
-//                         0,1,1,1,0 };
-
-//    Mat element = Mat(5, 5, CV_8U, elementData).clone();
-
-//    erode(src, dst, element, Point(-1,-1), 1, BORDER_CONSTANT, morphologyDefaultBorderValue());
-
-//    return dst;
-//}
-
-//Mat & Preprocessor::dilatecircle(Mat const & src, Mat & dst)
-//{
-//    int elementData[] = {0,1,1,1,0,
-//                         1,1,1,1,1,
-//                         1,1,1,1,1,
-//                         1,1,1,1,1,
-//                         0,1,1,1,0 };
-
-//    Mat element = Mat(5, 5, CV_8U, elementData).clone();
-
-//    dilate(src, dst, element, Point(-1,-1), 1, BORDER_CONSTANT, morphologyDefaultBorderValue());
-
-//    return dst;
-//}
+void Preprocessor::preprocessTracking(Mat const & src,
+                                      contours_t & acceptedContoursDst,
+                                      contours_t & biggerContoursDst,
+                                      int const gThresh,
+                                      int const minSizeThresh,
+                                      int const maxSizeThresh,
+                                      Backgroundsubtractor const & bs,
+                                      bool checkRoiBorders)
+{
+    // generate a scratch image
+    Mat tmpImg = Mat::zeros(src.size(), src.type());
+    
+    bs.subtractViaThresh(src,gThresh,tmpImg);
+    
+    // generate a contours container scratch
+    contours_t contours;
+    
+    // perform gray threshold
+    Preprocessor::graythresh(tmpImg,gThresh,tmpImg);
+    
+    // calculate the contours
+    Preprocessor::calcContours(tmpImg,contours);
+    
+    // check if contours overrun image borders (as well as ROI-borders, if ROI selected)
+    Preprocessor::borderRestriction(contours, src, checkRoiBorders);
+    
+    // filter the contours
+    Preprocessor::sizethreshold(contours, minSizeThresh, maxSizeThresh, acceptedContoursDst, biggerContoursDst);
+}

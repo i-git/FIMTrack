@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -273,54 +273,12 @@ void RegionOfInterestContainer::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *
 
 void RegionOfInterestContainer::wheelEvent(QGraphicsSceneWheelEvent *event)
 {
-    //    int index;
-    
-    //    if(this->findIndexOfROI(event->pos(), index))
-    //    {
-    //        if(this->mRegionOfInterests.at(index).isResizeable())
-    //        {
-    //            int numDegrees = event->delta() / 8;
-    //            int numSteps = numDegrees / 15;
-    
-    //            if(numSteps <= 0)
-    //            {
-    //                event->ignore();
-    //            }
-    
-    //            qreal factor = 1.0 + qreal(numSteps) / 300.0;
-    
-    //            if(event->modifiers().testFlag(Qt::AltModifier))
-    //            {
-    //                factor += qreal(numSteps) / 10.0;
-    //            }
-    
-    //            if(factor > 0.001)
-    //            {
-    //                this->mRegionOfInterests[index].scale(factor, factor);
-    //                event->accept();
-    //                this->update();
-    //            }
-    //            else
-    //            {
-    //                event->ignore();
-    //            }
-    //        }
-    //    }
-    //    else
-    //    {
     QGraphicsItem::wheelEvent(event);
-    //    }
 }
 
 void RegionOfInterestContainer::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     Q_UNUSED(event);
-    //    int index;
-    //    if(this->findIndexOfROI(event->pos(), index))
-    //    {
-    //        this->mRegionOfInterests[index].setResizeAnchorVisibility(event->pos());
-    //        this->update();
-    //    }
 }
 
 void RegionOfInterestContainer::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
@@ -378,11 +336,5 @@ void RegionOfInterestContainer::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 void RegionOfInterestContainer::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     Q_UNUSED(event);
-    //    int index;
-    //    if(this->findIndexOfROI(event->pos(), index))
-    //    {
-    //        this->mRegionOfInterests[index].setResizeAnchorVisibility(false);
-    //        this->update();
-    //    }
 }
 

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,22 +34,19 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QObject>
 #include <QString>
 #include <QTime>
 #include <QList>
 #include <QFile>
 #include <QTextStream>
-#pragma clang diagnostic pop
 
 enum LOGLEVEL
 {
     INFO,
     DEBUG,
     WARNING,
-    ERROR,
+    MERROR,
     FATAL
 };
 
@@ -57,21 +54,20 @@ class Logger : public QObject
 {
     Q_OBJECT
 private:
-    explicit Logger(QObject *parent = 0);
-    static Logger *instance;
+    explicit Logger(QObject* parent = 0);
+    static Logger* _instance;
     Logger(Logger const&);
     
-    static QList<QString> logList;
+    static QList<QString> _logList;
     
-    ~Logger(){}
+    ~Logger() {}
     
     class Guard
     {
-    public: ~Guard() 
-        {
-            if(Logger::instance != NULL)
-            {
-                delete Logger::instance;
+    public:
+        ~Guard() {
+            if (Logger::_instance != NULL) {
+                delete Logger::_instance;
             }
         }
     };

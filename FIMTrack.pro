@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = FIMTrack
 TEMPLATE = app
@@ -18,14 +18,16 @@ include(Utility/utility.pri)
 include(Configuration/configuration.pri)
 include(GUI/GUI.pri)
 include(Main/main.pri)
+include(Calculation/calculation.pri)
 
-CONFIG   += app_bundle
+CONFIG  += app_bundle
+
 
 macx {
 
-    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.9
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.11
 
-    QMAKE_CXXFLAGS += -stdlib=libc++
+    QMAKE_CXXFLAGS += -stdlib=libc++ -Wall
 
     INCLUDEPATH += /usr/local/include
 
@@ -39,12 +41,11 @@ macx {
 
 unix {
 
-    QMAKE_CXXFLAGS += -std=c++11
+    QMAKE_CXXFLAGS += -std=c++11 -Wall -pedantic -Wno-unknown-pragmas
 
     INCLUDEPATH += /usr/include
 
-    LIBS += -L/usr/lib \
-            -lopencv_core \
+    LIBS += -lopencv_core \
             -lopencv_highgui \
             -lopencv_imgproc
 
@@ -53,18 +54,20 @@ unix {
 
 win32{
 
-    INCLUDEPATH += D:\\Arbeit\\Bibliotheken\\OpenCV\\OpenCV-2.4.3\\include
+    INCLUDEPATH += C:\\OpenCV\\2.4.11\\build\\include
+
+    QMAKE_LFLAGS += /INCREMENTAL:NO
 
     CONFIG(debug,debug|release){
-        LIBS += D:\\Arbeit\\Bibliotheken\\OpenCV\\OpenCV-2.4.3\\build\\x86\\vc10\\lib\\opencv_core243d.lib
-        LIBS += D:\\Arbeit\\Bibliotheken\\OpenCV\\OpenCV-2.4.3\\build\\x86\\vc10\\lib\\opencv_highgui243d.lib
-        LIBS += D:\\Arbeit\\Bibliotheken\\OpenCV\\OpenCV-2.4.3\\build\\x86\\vc10\\lib\\opencv_imgproc243d.lib
+        LIBS += C:\\OpenCV\\2.4.11\build\\x86\\vc10\\lib\\opencv_core2411d.lib
+        LIBS += C:\\OpenCV\\2.4.11\build\\x86\\vc10\\lib\\opencv_highgui2411d.lib
+        LIBS += C:\\OpenCV\\2.4.11\build\\x86\\vc10\\lib\\opencv_imgproc2411d.lib
 
     }
 
     CONFIG(release,debug|release){
-        LIBS += D:\\Arbeit\\Bibliotheken\\OpenCV\\OpenCV-2.4.3\\build\\x86\\vc10\\lib\\opencv_core243.lib
-        LIBS += D:\\Arbeit\\Bibliotheken\\OpenCV\\OpenCV-2.4.3\\build\\x86\\vc10\\lib\\opencv_highgui243.lib
-        LIBS += D:\\Arbeit\\Bibliotheken\\OpenCV\\OpenCV-2.4.3\\build\\x86\\vc10\\lib\\opencv_imgproc243.lib
+        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc10\\lib\\opencv_core2411.lib
+        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc10\\lib\\opencv_highgui2411.lib
+        LIBS += C:\\OpenCV\\2.4.11\\build\\x86\\vc10\\lib\\opencv_imgproc2411.lib
     }
 }

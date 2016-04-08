@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -36,13 +36,10 @@
 
 #include "Configuration/FIMTrack.hpp"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QTime>
 #include <QString>
 #include <QRectF>
 #include <QIcon>
-#pragma clang diagnostic pop
 
 class RegionOfInterest
 {    

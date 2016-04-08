@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -35,20 +35,20 @@
 
 Undistorter::Undistorter()
 {
-    this->mIsInitialised = false;
+    this->_isInitialised = false;
 }
 
 Undistorter::Undistorter(std::string const& path)
 {
-    InputGenerator::readMatrices(path, this->mCameraMatrix, this->mDistCoeffs, this->mImageSize);
-    cv::initUndistortRectifyMap(this->mCameraMatrix,
-                                this->mDistCoeffs,
+    InputGenerator::readMatrices(path, this->_cameraMatrix, this->_distCoeffs, this->_imageSize);
+    cv::initUndistortRectifyMap(this->_cameraMatrix,
+                                this->_distCoeffs,
                                 cv::Mat(),
-                                this->mCameraMatrix,
-                                this->mImageSize,
+                                this->_cameraMatrix,
+                                this->_imageSize,
                                 CV_32FC1,
-                                this->mMapX, this->mMapY);
-    this->mIsInitialised = true;
+                                this->_mapX, this->_mapY);
+    this->_isInitialised = true;
     
 }
 
@@ -56,77 +56,75 @@ Undistorter::Undistorter(cv::Mat const& cameraMatrix,
                          cv::Mat const& distCoeffs, 
                          cv::Size const& imageSize)
 {
-    this->mCameraMatrix = cameraMatrix;
-    this->mDistCoeffs = distCoeffs;
-    this->mImageSize = imageSize;
+    this->_cameraMatrix = cameraMatrix;
+    this->_distCoeffs = distCoeffs;
+    this->_imageSize = imageSize;
     
-    cv::initUndistortRectifyMap(this->mCameraMatrix,
-                                this->mDistCoeffs,
+    cv::initUndistortRectifyMap(this->_cameraMatrix,
+                                this->_distCoeffs,
                                 cv::Mat(),
-                                this->mCameraMatrix,
-                                this->mImageSize,
+                                this->_cameraMatrix,
+                                this->_imageSize,
                                 CV_32FC1,
-                                this->mMapX, this->mMapY);
-    this->mIsInitialised = true;
+                                this->_mapX, this->_mapY);
+    this->_isInitialised = true;
 }
 
 void Undistorter::setPath(std::string const& path)
 {
-    InputGenerator::readMatrices(path, this->mCameraMatrix, this->mDistCoeffs, this->mImageSize);
-    cv::initUndistortRectifyMap(this->mCameraMatrix,
-                                this->mDistCoeffs,
+    InputGenerator::readMatrices(path, this->_cameraMatrix, this->_distCoeffs, this->_imageSize);
+    cv::initUndistortRectifyMap(this->_cameraMatrix,
+                                this->_distCoeffs,
                                 cv::Mat(),
-                                this->mCameraMatrix,
-                                this->mImageSize,
+                                this->_cameraMatrix,
+                                this->_imageSize,
                                 CV_32FC1,
-                                this->mMapX, this->mMapY);
-    this->mIsInitialised = true;
+                                this->_mapX, this->_mapY);
+    this->_isInitialised = true;
 }
 
 void Undistorter::setParameter(cv::Mat const& cameraMatrix, 
                                cv::Mat const& distCoeffs, 
                                cv::Size const& imageSize)
 {
-    this->mCameraMatrix = cameraMatrix;
-    this->mDistCoeffs = distCoeffs;
-    this->mImageSize = imageSize;
+    this->_cameraMatrix = cameraMatrix;
+    this->_distCoeffs = distCoeffs;
+    this->_imageSize = imageSize;
     
-    cv::initUndistortRectifyMap(this->mCameraMatrix,
-                                this->mDistCoeffs,
+    cv::initUndistortRectifyMap(this->_cameraMatrix,
+                                this->_distCoeffs,
                                 cv::Mat(),
-                                this->mCameraMatrix,
-                                this->mImageSize,
+                                this->_cameraMatrix,
+                                this->_imageSize,
                                 CV_32FC1,
-                                this->mMapX, this->mMapY);
-    this->mIsInitialised = true;
+                                this->_mapX, this->_mapY);
+    this->_isInitialised = true;
 }
 
-cv::Mat& Undistorter::getUndistortImage(const cv::Mat &src, cv::Mat &dst) const
+void Undistorter::getUndistortImage(const cv::Mat &src, cv::Mat &dst) const
 {
-    if(this->mIsInitialised)
+    if(this->_isInitialised)
     {
-        cv::remap(src, dst, this->mMapX, this->mMapY, cv::INTER_CUBIC);
+        cv::remap(src, dst, this->_mapX, this->_mapY, cv::INTER_CUBIC);
     }
-    
-    return dst;
 }
 
 bool Undistorter::isReady() const
 {
-    return this->mIsInitialised;
+    return this->_isInitialised;
 }
 
 void Undistorter::setReady(bool flag)
 {
-    this->mIsInitialised = flag;
+    this->_isInitialised = flag;
 }
 
 void Undistorter::reset()
 {
-    this->mIsInitialised = false;
-    this->mCameraMatrix.release();
-    this->mDistCoeffs.release();
-    this->mMapX.release();
-    this->mMapY.release();
-    this->mImageSize.height = this->mImageSize.width = 0;
+    this->_isInitialised = false;
+    this->_cameraMatrix.release();
+    this->_distCoeffs.release();
+    this->_mapX.release();
+    this->_mapY.release();
+    this->_imageSize.height = this->_imageSize.width = 0;
 }

@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -90,7 +90,6 @@ LarvaTab::LarvaTab(TrackerSceneLarva *sceneLarva,
 
 LarvaTab::~LarvaTab()
 {
-//    qDebug() << Q_FUNC_INFO << this->mSceneLarva->getID();
     delete ui;
     this->mFlashTimer->stop();
     delete this->mFlashTimer;
@@ -173,7 +172,6 @@ void LarvaTab::setColor(QColor color)
                 +QString::number(color.blue())
                 +"); color : black; }");
     
-    //    this->mSceneLarva->setColor(this->mColor);
     emit sendNewColor(color);
 }
 

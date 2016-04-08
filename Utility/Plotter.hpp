@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -40,20 +40,18 @@ class Plotter : public QCustomPlot
 {
     
 private:
-    QVector<double>     mXLine;
-    QVector<double>     mYLine;
+    QVector<double>     _xLine;
+    QVector<double>     _yLine;
     
-    QVector<double>     mXMarker;
-    QVector<double>     mYMarker;
+    QVector<double>     _xMarker;
+    QVector<double>     _yMarker;
     
-    double              mMarkerSize;
+    double              _markerSize;
     
-    QSize               mImageSize;
+    QSize               _imageSize;
     
 public:
     Plotter(QWidget *parent = 0);
-    
-    void setPlotTitle(QString const& title);
     
     void setXAxisLable(QString const& lable);
     void setYAxisLable(QString const& lable);
@@ -61,15 +59,13 @@ public:
     void setXAxisRange(double from, double to);
     void setYAxisRange(double from, double to);
     
-    void setImageSize(QSize const& size) {this->mImageSize = size;}
+    void setImageSize(QSize const& size) {this->_imageSize = size;}
     
 public slots:
     void plotDataAsLine(QVector<double> const& x, QVector<double> const& y);
     void plotDataAsMarker(QVector<double> const& x, QVector<double> const& y);
     void plotCurrentTimeStepMarker(double timeStep, double firstTimeStep, bool isMarkerPlot);
     void reset();
-//    void addGraph(QString const& id);
-//    void removeGraph(QString const& id);
     
 };
 

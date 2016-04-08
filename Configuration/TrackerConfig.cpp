@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -33,15 +33,21 @@
 
 #include "TrackerConfig.hpp"
 
+namespace StringConstats 
+{
+   std::string  fileFormats = "*.tif *.tiff *.png";
+   std::string  textFileCoding = "UTF-8";
+}
+
 namespace GeneralParameters
 {
-    int      iGrayThreshold                                         = 50;
+    int      iGrayThreshold                                         = 40;
     int      defaultGrayThreshold                                   = iGrayThreshold;
     
-    int      iMinLarvaeArea                                         = 150;
+    int      iMinLarvaeArea                                         = 200;
     int      defaultMinLarvaeArea                                   = iMinLarvaeArea;
     
-    int      iMaxLarvaeArea                                         = 450;
+    int      iMaxLarvaeArea                                         = 500;
     int      deaultMaxLarvaeArea                                    = iMaxLarvaeArea;
     
     bool     bShowTrackingProgress                                  = true;
@@ -86,7 +92,7 @@ namespace TrackingParameters
     const QString momentumID                                        = QString("Momentum");
     const QString landmarkID                                        = QString("Distance to Landmark");
     const QString bearinAngleID                                     = QString("Bearinangle to Landmark");
-    const QStringList parameterForPlotting                          = QStringList() << "Area" << momentumID << "Main Bodybending-Angle" << "Coiled-Indicator"
+    const QStringList parameterForPlotting                          = QStringList() << "Area" << momentumID << "Main Bodybending-Angle" << "Coiled-Indicator" << "Well-Oriented"
                                                                                     << "Perimeter" << "Distance To Origin" << "Momentum Distance" << "Accumulated Distance"
                                                                                     << "Go-Phase Indicator" << "Left-Bending Indicator" << "Right-Bending Indicator"
                                                                                     << "Movement Direction" << landmarkID << "Velocity" << "Acceleration" << bearinAngleID;
@@ -120,11 +126,14 @@ namespace LarvaeExtractionParameters
     
     namespace CoiledRecognitionParameters
     {
-        double   dPerimeterToSpinelenghtThreshold                   = 2.6;
+        double   dPerimeterToSpinelenghtThreshold                   = 2.4;
         double   defaultPerimeterToSpinelenghtThreshold             = dPerimeterToSpinelenghtThreshold;
         
-        double   dMidcirclePerimeterToPerimeterThreshold            = 0.5;
+        double   dMidcirclePerimeterToPerimeterThreshold            = 0.6;
         double   defaultMidcirclePerimeterToPerimeterThreshold      = dMidcirclePerimeterToPerimeterThreshold;
+
+        double   dMaxToMeanRadiusThreshold                          = 2.3;
+        double   defaultMaxToMeanRadiusThreshold                    = dMaxToMeanRadiusThreshold;
     }
     
     namespace StopAndGoCalculation
@@ -159,6 +168,21 @@ namespace LarvaeExtractionParameters
         int iFramesForMovementDirectionCalculation                  = 10;
         int defaultFramesForMovementDirectionCalculation            = iFramesForMovementDirectionCalculation;
     }
+
+    namespace AssignmentParameters
+    {
+        AssignmentMethod eAssignmentMethod = HUNGARIAN;
+        AssignmentMethod defaultAssignmentMethod = eAssignmentMethod;
+
+        CostMeasure eCostMeasure = OVERLAP;
+        CostMeasure defaultCostMeasure = eCostMeasure;
+
+        double dDistanceThreshold = 0.5;
+        double defaultDistanceThreshold = dDistanceThreshold;
+
+        double dOverlapThreshold = 0.5;
+        double defaultOverlapThreshold = dOverlapThreshold;
+    }
 }
 
 namespace TrackerConfig
@@ -192,7 +216,8 @@ namespace TrackerConfig
         
         LarvaeExtractionParameters::CoiledRecognitionParameters::dPerimeterToSpinelenghtThreshold                   = LarvaeExtractionParameters::CoiledRecognitionParameters::defaultPerimeterToSpinelenghtThreshold;
         LarvaeExtractionParameters::CoiledRecognitionParameters::dMidcirclePerimeterToPerimeterThreshold            = LarvaeExtractionParameters::CoiledRecognitionParameters::defaultMidcirclePerimeterToPerimeterThreshold;
-    
+        LarvaeExtractionParameters::CoiledRecognitionParameters::dMaxToMeanRadiusThreshold                          = LarvaeExtractionParameters::CoiledRecognitionParameters::defaultMaxToMeanRadiusThreshold;
+
         LarvaeExtractionParameters::StopAndGoCalculation::bUseDynamicStopAndGoParameterCalculation                  = LarvaeExtractionParameters::StopAndGoCalculation::defauUseDynamicStopAndGoParameterCalculation;
         LarvaeExtractionParameters::StopAndGoCalculation::iFramesForSpeedCalculation                                = LarvaeExtractionParameters::StopAndGoCalculation::defaultFramesForSpeedCalculation;
         LarvaeExtractionParameters::StopAndGoCalculation::iSpeedThreshold                                           = LarvaeExtractionParameters::StopAndGoCalculation::defaultSpeedThreshold;
@@ -203,5 +228,10 @@ namespace TrackerConfig
 
         LarvaeExtractionParameters::MovementDirectionParameters::bUseDynamicMovementDirectionParameterCalculation   = LarvaeExtractionParameters::MovementDirectionParameters::defaultUseDynamicMovementDirectionParameterCalculation;
         LarvaeExtractionParameters::MovementDirectionParameters::iFramesForMovementDirectionCalculation             = LarvaeExtractionParameters::MovementDirectionParameters::defaultFramesForMovementDirectionCalculation;
+
+        LarvaeExtractionParameters::AssignmentParameters::eAssignmentMethod                                         = LarvaeExtractionParameters::AssignmentParameters::defaultAssignmentMethod;
+        LarvaeExtractionParameters::AssignmentParameters::eCostMeasure                                              = LarvaeExtractionParameters::AssignmentParameters::defaultCostMeasure;
+        LarvaeExtractionParameters::AssignmentParameters::dDistanceThreshold                                        = LarvaeExtractionParameters::AssignmentParameters::defaultDistanceThreshold;
+        LarvaeExtractionParameters::AssignmentParameters::dOverlapThreshold                                         = LarvaeExtractionParameters::AssignmentParameters::defaultOverlapThreshold;
     }
 }

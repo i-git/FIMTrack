@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,12 +34,10 @@
 #ifndef TRACKERGRAPHICSVIEW_HPP
 #define TRACKERGRAPHICSVIEW_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QGraphicsView>
 #include <QWheelEvent>
 #include <QMouseEvent>
-#pragma clang diagnostic pop
+#include <QMenu>
 
 #include "TrackerScene.hpp"
 #include "Landmark.hpp"
@@ -111,11 +109,6 @@ private:
     * Scene displayed by this view.
     */
     TrackerScene*                           mScene;
-    
-//    QMap<QString, QVector<Landmark *> >     mLandmarks;
-//    QVector<Landmark*>                      mLandmarks;
-    
-//    void setupContextMenu();
     
 private slots:
     void addPointLandmark();

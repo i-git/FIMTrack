@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -112,7 +112,7 @@ bool LandmarkContainer::contains(const QPointF &p) const
 QStringList LandmarkContainer::getAllLandmarkNames() const
 {
     QStringList res;
-    for(Landmark* l : this->mLandmarks)
+    foreach(Landmark* l, this->mLandmarks)
     {
         res << l->getName();
     }
@@ -140,7 +140,7 @@ void operator>> (cv::FileNode const& n, LandmarkContainer* c)
     cv::FileNode parametersNode = n["Landmarks"];
     for (cv::FileNodeIterator fnIt = parametersNode.begin(); fnIt != parametersNode.end(); ++fnIt)
     {
-        Landmark* l = new Landmark(/*c->mParentScene*/);
+        Landmark* l = new Landmark();
         (*fnIt) >> l;
         c->addLandmark(l);
     }

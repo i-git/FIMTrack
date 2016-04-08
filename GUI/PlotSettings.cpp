@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -38,32 +38,58 @@ PlotSettings::PlotSettings(uint larvaID, LarvaeContainer *larvaContainer, QWidge
     QWidget(parent),
     ui(new Ui::PlotSettings)
 {
+    
+    this->mLarvaContainer = nullptr;
+    this->mLastModifiedPlotWindow = nullptr;    
     this->ui->setupUi(this);
     
     this->mLarvaID = larvaID;
     
     this->mLarvaContainer = larvaContainer;
     
+    bool oldState = this->ui->comboBox->blockSignals(true);
     this->ui->comboBox->clear();
     this->ui->comboBox->addItems(TrackingParameters::parameterForPlotting);
+    this->ui->comboBox->blockSignals(oldState);
     
     this->mCurrentTimeStep = 0;
     
     this->ui->cbLandmarkName->setVisible(false);
     
-    connect(this->ui->comboBox,         SIGNAL(currentIndexChanged(QString)),   this,   SLOT(updatePlotWindow()));
-    connect(this->ui->cbLandmarkName,   SIGNAL(currentIndexChanged(QString)),   this,   SLOT(updatePlotWindow()));
+    connect(this->ui->comboBox,                     SIGNAL(currentIndexChanged(QString)),   this,   SLOT(updatePlotWindow()));
+    connect(this->ui->cbLandmarkName,               SIGNAL(currentIndexChanged(QString)),   this,   SLOT(updatePlotWindow()));
     
-    connect(this->mLarvaContainer,      SIGNAL(sendLarvaModelDeleted()),        this,   SLOT(updatePlotWindow()));
-    connect(this->mLarvaContainer,      SIGNAL(sendUpdatedResultLarvaID(uint)), this,   SLOT(updatePlotsOnChange(uint)));
+    connect(this->mLarvaContainer,                  SIGNAL(sendLarvaModelDeleted()),        this,   SLOT(updatePlotWindow()));
+    connect(this->mLarvaContainer,                  SIGNAL(sendUpdatedResultLarvaID(uint)), this,   SLOT(updatePlotsOnChange(uint)));
     
-    connect(this->ui->btChangePlottingparameter,          SIGNAL(clicked()),                this,   SLOT(readPlottingParameter()));
+    connect(this->ui->btChangePlottingparameter,    SIGNAL(clicked()),                      this,   SLOT(readPlottingParameter()));
+    
+    this->ui->label->setVisible(false);
+    this->ui->label_2->setVisible(false);
+    this->ui->label_3->setVisible(false);
+    this->ui->label_4->setVisible(false);
+    this->ui->label_5->setVisible(false);
+    this->ui->label_6->setVisible(false);
+    this->ui->label_7->setVisible(false);
+    
+    this->ui->line->setVisible(false);
+    this->ui->line_2->setVisible(false);
+    
+    this->ui->leTitel->setVisible(false);
+    this->ui->leXLabel->setVisible(false);
+    this->ui->leXMax->setVisible(false);
+    this->ui->leXMin->setVisible(false);
+    this->ui->leYLabel->setVisible(false);
+    this->ui->leYMax->setVisible(false);
+    this->ui->leYMin->setVisible(false);
+    
+    this->ui->btChangePlottingparameter->setVisible(false);
 }
 
 PlotSettings::~PlotSettings()
 {
     delete ui;
-    for(PlotWindow* w : this->mPlotWindows)
+    foreach(PlotWindow* w, this->mPlotWindows)
     {
         w->close();
     }
@@ -74,44 +100,39 @@ void PlotSettings::setVisible(bool visible)
     QWidget::setVisible(visible);
     if(visible)
     {
-        for(PlotWindow* w : this->mPlotWindows)
+        foreach(PlotWindow* w, this->mPlotWindows)
         {
             w->show();
         }
-//        this->mPlotWindow->show();
     }
 }
 
 void PlotSettings::setCurrentTimeStep(int timeStep)
 {
     this->mCurrentTimeStep = timeStep;
-    for(PlotWindow* w : this->mPlotWindows)
+    foreach(PlotWindow* w, this->mPlotWindows)
     {
         w->plotCurrentTimeStepMarker(this->mCurrentTimeStep, 
                                      this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID).front(), 
                                      this->ui->comboBox->currentText().compare(TrackingParameters::momentumID) == 0);
     }
-    /*
-    this->mPlotWindow->plotCurrentTimeStepMarker(this->mCurrentTimeStep, 
-                                                 this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID).front(), 
-                                                 this->ui->comboBox->currentText().compare(TrackingParameters::momentumID) == 0);
-                                                 */
 }
 
 void PlotSettings::setImageSize(const QSize &size)
 {
     this->mImageSize = size;
-    for(PlotWindow* w : this->mPlotWindows)
+    foreach(PlotWindow* w, this->mPlotWindows)
     {
         w->setImageSize(this->mImageSize);
     }
-//    this->mPlotWindow->setImageSize(this->mImageSize);
 }
 
 void PlotSettings::setAvailableLandmarkNames(const QStringList &landmarkNames)
 {
+    bool oldState = this->ui->cbLandmarkName->blockSignals(true);
     this->ui->cbLandmarkName->clear();
     this->ui->cbLandmarkName->addItems(landmarkNames);
+    this->ui->cbLandmarkName->blockSignals(oldState);
 }
 
 void PlotSettings::updatePlotWindow()
@@ -150,7 +171,7 @@ void PlotSettings::updatePlotWindow()
             // Momentum
         case 1:
             moments = this->mLarvaContainer->getAllMomentumValues(this->mLarvaID);
-            for(cv::Point p : moments)
+            foreach(cv::Point p, moments)
             {
                 x << (static_cast<double>(p.x));
                 y << this->mImageSize.height() - (static_cast<double>(p.y));
@@ -169,63 +190,68 @@ void PlotSettings::updatePlotWindow()
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllCoiledIndicator(this->mLarvaID));
             break;
             
-            // Perimeter
+            // Well-Oriented-Indicator
         case 4:
+            w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllIsWellOriented(this->mLarvaID));
+            break;
+
+            // Perimeter
+        case 5:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllPerimeter(this->mLarvaID));
             break;
             
             // Distance To Origin
-        case 5:
+        case 6:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllDistanceToOrigin(this->mLarvaID));
             break;
             
             // Momentum Distance
-        case 6:
+        case 7:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllMomentumDistance(this->mLarvaID));
             break;
             
             // Accumulated Distance
-        case 7:
+        case 8:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllAccumulatedDistance(this->mLarvaID));
             break;
             
             // Go-Phase Indicator
-        case 8:
+        case 9:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllGoPhaseIndicator(this->mLarvaID));
             break;
             
             // Left-Bending Indicator
-        case 9:
+        case 10:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllLeftBendingIndicator(this->mLarvaID));
             break;
             
             // Right-Bending Indicator
-        case 10:
+        case 11:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllRightBendingIndicator(this->mLarvaID));
             break;
             
             // Movement Direction
-        case 11:
+        case 12:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllMovementDirection(this->mLarvaID));
             break;
             
             // Distance to Landmark
-        case 12:
+        case 13:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllDistancesToLandmark(this->mLarvaID, this->ui->cbLandmarkName->currentText()));
             break;
             
             // Velocity
-        case 13:
+        case 14:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getVelocity(this->mLarvaID));
             break;
             
             // Acceleration
-        case 14:
+        case 15:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAcceleration(this->mLarvaID));
             break;
             
             // Bearinangle to Landmark
-        case 15:
+        case 16:
             w->plotDataAsLine(this->mLarvaContainer->getAllTimestepsForPlotting(this->mLarvaID), this->mLarvaContainer->getAllBearingAnglesToLandmark(this->mLarvaID, this->ui->cbLandmarkName->currentText()));
             break;
         }
@@ -236,7 +262,7 @@ void PlotSettings::updatePlotWindow()
 
 bool PlotSettings::checkForPlottingWindow(QString plotWindoID)
 {
-    for(PlotWindow* w : this->mPlotWindows)
+    foreach(PlotWindow* w, this->mPlotWindows)
     {
         if(w->getID() == plotWindoID)
         {
@@ -287,7 +313,7 @@ void PlotSettings::removePlottingWindow(QString windowID)
     if(!this->mPlotWindows.isEmpty())
         this->mLastModifiedPlotWindow = this->mPlotWindows.last();
     else
-        this->mLastModifiedPlotWindow = NULL;
+        this->mLastModifiedPlotWindow = nullptr;
 }
 
 QString PlotSettings::generatePlotWindowID(QString const& plotValue)

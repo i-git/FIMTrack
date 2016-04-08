@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -38,7 +38,7 @@ PlottingTab::PlottingTab(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PlottingTab)
 {
-    this->mLarvaeContainer = NULL;
+    this->mLarvaeContainer = nullptr;
     
     ui->setupUi(this);
     
@@ -68,28 +68,32 @@ void PlottingTab::setLarvaeContainerPointer(LarvaeContainer *larvaeContainer)
         disconnect(this, SLOT(removePlottingSettings(uint)));
 }
 
-void PlottingTab::setAvailableLarvaIDs(const QStringList &larvaIDs)
+void PlottingTab::setAvailableLarvaIDs()
 {
+    QStringList ids = this->mLarvaeContainer->getAllLarvaeIDs();
+    bool oldState = this->ui->cbAvailableLarvaIDs->blockSignals(true);
     this->ui->cbAvailableLarvaIDs->clear();
-    this->ui->cbAvailableLarvaIDs->addItems(larvaIDs);
+    this->ui->cbAvailableLarvaIDs->addItems(ids);
+    this->ui->cbAvailableLarvaIDs->blockSignals(oldState);
 }
 
 void PlottingTab::setAvailableLandmarkNames(const QStringList &landmarkNames)
 {
     this->mLandmarkNames = landmarkNames;
-    for(PlotSettings* p : this->mPlottingSettings)
+    foreach(PlotSettings* p, this->mPlottingSettings)
         p->setAvailableLandmarkNames(this->mLandmarkNames);
 }
 
 void PlottingTab::showCroppedImage(const QImage &img)
 {
-    this->ui->label_2->setPixmap(QPixmap::fromImage(img));
+    if(!img.isNull())
+        this->ui->label_2->setPixmap(QPixmap::fromImage(img));
 }
 
 void PlottingTab::bookmarkCroppedTimeStemp(int timeStemp)
 {
     bool ok;
-    uint lID = this->ui->cbAvailableLarvaIDs->currentText().toUInt(&ok);
+    uint lID = this->ui->cbAvailableLarvaIDs->currentText().split(" ").first().toUInt(&ok);
     
     if(ok)
     {
@@ -105,7 +109,7 @@ void PlottingTab::bookmarkCroppedTimeStemp(int timeStemp)
 void PlottingTab::setImageSize(QSize size)
 {
     this->mImageSize = size;
-    for(PlotSettings* p : this->mPlottingSettings)
+    foreach(PlotSettings* p, this->mPlottingSettings)
     {
         p->setImageSize(this->mImageSize);
     }
@@ -121,19 +125,19 @@ void PlottingTab::addSubWindow(PlotWindow *w)
 void PlottingTab::adjustPlottingSettings(QString larvaID)
 {
     bool ok;
-    uint lID = larvaID.toUInt(&ok);
+    QString qstrLID = larvaID.split(" ").first();
+    uint lID = qstrLID.toUInt(&ok);
     if(ok)
     {             
         int idx;
         if(this->findPlottingSettings(lID, idx))
         {
-            for(PlotSettings* p : this->mPlottingSettings)
+            foreach(PlotSettings* p, this->mPlottingSettings)
                 p->setVisible(false);
             
             PlotSettings* p = this->mPlottingSettings.at(idx);
             p->setVisible(true);
-//            this->ui->mdiArea->setActiveSubWindow(p->getLastModifiedPlotWindowPointer());
-            emit sendCurrentPlottingParameter(larvaID, p->getCurrentTimeStep());
+            emit sendCurrentPlottingParameter(qstrLID, p->getCurrentTimeStep());
         }
     }
 }
@@ -176,15 +180,17 @@ void PlottingTab::removePlottingSettings(uint larvaID)
         if(this->findPlottingSettings(larvaID, index))
         {
             this->mPlottingSettings.remove(index);
+            bool oldState = this->ui->cbAvailableLarvaIDs->blockSignals(true);
             this->ui->cbAvailableLarvaIDs->clear();
             this->ui->cbAvailableLarvaIDs->addItems(this->mLarvaeContainer->getAllLarvaeIDs());
+            this->ui->cbAvailableLarvaIDs->blockSignals(oldState);
         }
     }
 }
 
 bool PlottingTab::checkForPlottingSettings(uint larvaID)
 {
-    for(PlotSettings* &p : this->mPlottingSettings)
+    foreach(PlotSettings* p, this->mPlottingSettings)
     {
         if(p->getLarvaID() == larvaID)
             return true;
@@ -221,9 +227,4 @@ void PlottingTab::createPlottingSettings(uint larvaID)
     this->mPlottingSettings.back()->setVisible(false);
     this->mPlottingSettings.back()->setAvailableLandmarkNames(this->mLandmarkNames);
     this->mPlottingSettings.back()->setImageSize(this->mImageSize);
-    
-    
-    //    this->ui->mdiArea->addSubWindow(this->mPlottingSettings.back()->getLastAddedPlotWindowPointer());
-    //    this->mPlottingSettings.back()->setAttribute(Qt::WA_DeleteOnClose);
-    //    this->mPlottingSettings.back()->getLastAddedPlotWindowPointer()->show();
 }

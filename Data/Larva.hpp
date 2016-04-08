@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -43,14 +43,6 @@
 
 #include "RawLarva.hpp"
 
-/**
- * @brief contourType is used to store contour points
- */
-typedef std::vector<cv::Point> contourType;
-/**
- * @brief spineType is used to store spine points
- */
-typedef std::vector<cv::Point> spineType;
 
 /**
  * @brief The Larva class is the main class to store all larval parameters
@@ -90,7 +82,7 @@ public:
      *  (using this constructor) and subsequently filled with values (using <<-operator in Larva.cpp).
      */
     Larva();
-
+    
     /**
      * @brief The ValuesType struct is the basic struct storing all measurements (i.e. features)
      *          for a single time point
@@ -99,7 +91,7 @@ public:
         /**
          * @brief spine of the larva
          */
-        spineType spine;
+        FIMTypes::spine_t spine;
         /**
          * @brief momentum point of the larval contour
          */
@@ -128,6 +120,10 @@ public:
          * @brief isCoiled if the larva is in a coiled structure (i.e. if the larval contour is approximatly a circle) this value is set to 1 (0 otherwise)
          */
         bool isCoiled;
+        /**
+         * @brief isWellOriented if the larval orientation could be verified (i.e. head and tail detection successfully performed)
+         */
+        bool isWellOriented;
         /**
          * @brief distToOrigin the distance to the origin (i.e. first measured position; based on the momentum)
          */
@@ -189,9 +185,9 @@ public:
         std::map<std::string, double>     bearinAngle;
         
     } values;
-
+    
     // Parameters:
-
+    
     /**
      * @brief parameters map all time points to the values (i.e. features) for this time point
      *
@@ -200,7 +196,12 @@ public:
      * methods below).
      */
     std::map<unsigned int, ValuesType> parameters;
-
+    
+    /**
+     * @brief contour is the last detected contour of this larva
+     */
+    FIMTypes::contour_t contour;
+    
     /**
      * @brief operator << is overloaded to store larva into files (i.e. fs << larva)
      * @param fs the file storage in which the (whole larva object) should be stored
@@ -208,7 +209,7 @@ public:
      * @return returns the file storage object
      */
     friend cv::FileStorage& operator<<(cv::FileStorage& fs, Larva const& larva);
-
+    
     /**
      * @brief operator >> is overloaded to read all larval parameters from a FileNode (i.e. the
      *          yaml-representation file storage representation of a larval object)
@@ -216,17 +217,17 @@ public:
      * @param larva the larva object to be filled with the data from the file node
      */
     friend void operator>>(cv::FileNode const& n, Larva& larva);
-
+    
     /**
      * @brief nSpinePoints stores the number of spine points for descrete spine representation
      */
     unsigned int nSpinePoints;
-
+    
     /**
      * @brief origin is the point in which the larva has been detected for the first time point
      */
     cv::Point origin;
-
+    
     /**
      * @brief id specifies the unique larval ID
      */
@@ -252,32 +253,36 @@ public:
     
     void setOrigin(cv::Point const& p) {this->origin = p;}
     
-    bool setSpineAt(unsigned int const timePoint, spineType const& spine);
-
+    bool setSpineAt(unsigned int const timePoint, FIMTypes::spine_t const& spine);
+    
     // getter methods
     unsigned int getNSpinePoints() const {return nSpinePoints;}
-
+    
     unsigned int getSpineMidPointIndex(void) const {return ((unsigned int) (nSpinePoints - 1) /2);}
-
+    
     unsigned int getID (void) const {return id;}
-
+    
     std::vector<cv::Point> getAllMidPoints(void) const;
     std::vector<cv::Point> getAllHeadPoints(void) const;
     std::vector<cv::Point> getAllTailPoints(void) const;
-
+    
     std::vector<unsigned int> getAllTimeSteps(void) const;
     
     void invert(uint time);
-
+    
     cv::Point getOrigin() const {return this->origin;}
-    bool getSpineAt(unsigned int const timePoint, spineType & retSpine) const;
+    bool getSpineAt(unsigned int const timePoint, FIMTypes::spine_t & retSpine) const;
+    bool getSpineMidPointAt(unsigned int const timePoint, cv::Point & retSpineMidPoint) const;
     bool getMomentumAt(unsigned int const timePoint, cv::Point & retMomentum) const;
+    bool getHeadAt(unsigned int const timePoint, cv::Point & retHead) const;
+    bool getTailAt(unsigned int const timePoint, cv::Point & retTail) const;
     bool getAreaAt(unsigned int const timePoint, double & retArea) const;
     bool getVelosityAt(unsigned int const timePoint, double & retVelosity) const;
     bool getAccelerationAt(unsigned int const timePoint, double & retAcceleration) const;
     bool getSpineRadiiAt(unsigned int const timePoint, std::vector<double> & retSpineRadii) const;
     bool getMainBodyBendingAngleAt(unsigned int const timePoint, double & retMainBodyBendingAngle) const;
     bool getIsCoiledIndicatorAt(unsigned int const timePoint, bool & retIsCoiledIndicator) const;
+    bool getIsWellOrientedAt(unsigned int const timePoint, bool & retIsWellOriented) const;
     bool getSpineLengthAt(unsigned int const timePoint, double & retSpineLength) const;
     bool getPerimeterAt(unsigned int const timePoint, double & retPerimeter) const;
     bool getDistToOriginAt(unsigned int const timePoint, double & retDistToOrigin) const;
@@ -291,7 +296,7 @@ public:
     bool getBearingAngleToLandmark(unsigned int const timePoint, std::string landmarkName, double & retBearingAngleToLandmark) const;
     bool getIsInLandmarkIndicator(unsigned int const timePoint, std::string landmarkName, bool & retIsInLandmark) const;
     bool getSpinePointAt(unsigned int const timePoint, unsigned int const index, cv::Point & spinePoint) const;
-
+    
     // string getter methods
     std::string getStrMomentum(unsigned int const timePoint, unsigned int const dimension) const;
     std::string getStrArea(unsigned int const timePoint) const;
@@ -301,6 +306,7 @@ public:
     std::string getStrSpineRadius(unsigned int const timePoint, unsigned int const index) const;
     std::string getStrMainBodyBendingAngle(unsigned int const timePoint) const;
     std::string getStrIsCoiledIndicator(unsigned int const timePoint) const;
+    std::string getStrIsWellOriented(unsigned int const timePoint) const;
     std::string getStrSpineLength(unsigned int const timePoint) const;
     std::string getStrPerimeter(unsigned int const timePoint) const;
     std::string getStrDistToOrigin(unsigned int const timePoint) const;
@@ -313,11 +319,9 @@ public:
     std::string getStrDistanceToLandmark(unsigned int const timePoint, std::string landmarkName) const;
     std::string getStrIsInLandmark(unsigned int const timePoint, std::string landmarkName) const;
     std::string getStrBearingAngleToLandmark(unsigned int const timePoint, std::string landmarkName) const;
-
+    
 private:
     int getXorY(cv::Point const & pt, unsigned int dimension) const;
-//    friend cv::FileStorage& operator<<(cv::FileStorage& fs, Larva const& larva);
-//    friend void operator>>(cv::FileNode const & n, Larva & larva);
 };
 
 #endif // LARVA_HPP

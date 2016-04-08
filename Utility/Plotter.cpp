@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,12 +34,9 @@
 #include "Plotter.hpp"
 
 Plotter::Plotter(QWidget *parent) 
-    : QCustomPlot(parent)
-{
-    //    this->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
-    
-    this->mMarkerSize = 5;
-    
+    : QCustomPlot(parent),
+      _markerSize(5)
+{    
     this->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
     
     // Graph for Lineplots
@@ -54,21 +51,13 @@ Plotter::Plotter(QWidget *parent)
     this->addGraph(this->xAxis, this->yAxis);
     this->graph(2)->setPen(QColor(6, 48, 200, 255));
     this->graph(2)->setLineStyle(QCPGraph::lsNone);
-    this->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, this->mMarkerSize));
+    this->graph(2)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, this->_markerSize));
     
     // Graph to visualize current Position in Markerplot
     this->addGraph(this->xAxis, this->yAxis);
     this->graph(3)->setPen(QColor(255, 0, 51, 255));
     this->graph(3)->setLineStyle(QCPGraph::lsNone);
-    this->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, this->mMarkerSize));
-}
-
-void Plotter::setPlotTitle(const QString &title)
-{
-//    qDebug() << title;
-//    this->plotLayout()->insertRow(0); // inserts an empty row above the default axis rect
-//    this->plotLayout()->addElement(0, 0, new QCPPlotTitle(this, title));
-//    this->replot();
+    this->graph(3)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssDisc, this->_markerSize));
 }
 
 void Plotter::setXAxisLable(const QString &lable)
@@ -97,33 +86,31 @@ void Plotter::setYAxisRange(double from, double to)
 
 void Plotter::plotDataAsLine(const QVector<double> &x, const QVector<double> &y)
 {
-    this->mXLine    = x;
-    this->mYLine    = y;
+    this->_xLine    = x;
+    this->_yLine    = y;
     
     this->graph(2)->clearData();
     this->graph(3)->clearData();
     
     this->graph(0)->clearData();
-    this->graph(0)->setData(this->mXLine, this->mYLine);
-    this->setXAxisRange(*std::min_element(this->mXLine.begin(), this->mXLine.end())-1, *std::max_element(this->mXLine.begin(), this->mXLine.end())+1);
-    this->setYAxisRange(*std::min_element(this->mYLine.begin(), this->mYLine.end())-1, *std::max_element(this->mYLine.begin(), this->mYLine.end())+1);
+    this->graph(0)->setData(this->_xLine, this->_yLine);
+    this->setXAxisRange(*std::min_element(this->_xLine.begin(), this->_xLine.end())-1, *std::max_element(this->_xLine.begin(), this->_xLine.end())+1);
+    this->setYAxisRange(*std::min_element(this->_yLine.begin(), this->_yLine.end())-1, *std::max_element(this->_yLine.begin(), this->_yLine.end())+1);
     this->replot();
 }
 
 void Plotter::plotDataAsMarker(const QVector<double> &x, const QVector<double> &y)
 {
-    this->mXMarker = x;
-    this->mYMarker = y;
+    this->_xMarker = x;
+    this->_yMarker = y;
 
     this->graph(0)->clearData();
     this->graph(1)->clearData();
     
     this->graph(2)->clearData();
-    this->graph(2)->setData(this->mXMarker, this->mYMarker);
-    //    this->setXAxisRange(*std::min_element(this->mXMarker.begin(), this->mXMarker.end())-1, *std::max_element(this->mXMarker.begin(), this->mXMarker.end())+1);
-    //    this->setYAxisRange(*std::min_element(this->mYMarker.begin(), this->mYMarker.end())-1, *std::max_element(this->mYMarker.begin(), this->mYMarker.end())+1);
-    this->setXAxisRange(0.0, this->mImageSize.width() + 1);
-    this->setYAxisRange(0.0, this->mImageSize.height() + 1);
+    this->graph(2)->setData(this->_xMarker, this->_yMarker);
+    this->setXAxisRange(0.0, this->_imageSize.width() + 1);
+    this->setYAxisRange(0.0, this->_imageSize.height() + 1);
     this->replot();
 }
 
@@ -132,14 +119,14 @@ void Plotter::plotCurrentTimeStepMarker(double timeStep, double firstTimeStep, b
     if(!this->graph(0)->data()->empty())
     {        
         this->graph(1)->clearData();
-        this->graph(1)->setData(QVector<double>() << (timeStep+1) << (timeStep+1), QVector<double>() << *std::min_element(this->mYLine.begin(), this->mYLine.end()) << *std::max_element(this->mYLine.begin(), this->mYLine.end()));
+        this->graph(1)->setData(QVector<double>() << (timeStep+1) << (timeStep+1), QVector<double>() << *std::min_element(this->_yLine.begin(), this->_yLine.end()) << *std::max_element(this->_yLine.begin(), this->_yLine.end()));
         this->replot();
     }
     
     if(!this->graph(2)->data()->empty())
     {
         this->graph(3)->clearData();
-        this->graph(3)->setData(QVector<double>() << this->mXMarker.at(timeStep - firstTimeStep + 1), QVector<double>() << this->mYMarker.at(timeStep - firstTimeStep + 1));
+        this->graph(3)->setData(QVector<double>() << this->_xMarker.at(timeStep - firstTimeStep + 1), QVector<double>() << this->_yMarker.at(timeStep - firstTimeStep + 1));
         this->replot();
     }
 }

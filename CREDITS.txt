@@ -14,8 +14,8 @@ Developed at: Research Group Research Group Computer Vision and Pattern Recognit
 ----------------
 Main developers:
 
-Benjamin Risse 	<b.risse@uni-muenster.de>
-Dimitri Berh	<d.berh@uni-muenster.de>
+Benjamin Risse 	<b.risse[AT]uni-muenster[DOT]de>
+Dimitri Berh	<d.berh[AT]uni-muenster[DOT]de>
 
 ----------------
 Contributers (alphabetically):

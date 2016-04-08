@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -36,30 +36,11 @@
 using namespace cv;
 using std::vector;
 
-void OutputGenerator::writeMatrices(std::string const& path,
-                                    cv::Mat const& cameraMatrix,
-                                    cv::Mat const& distCoeffs,
-                                    cv::Size const& imageSize)
+void OutputGenerator::saveConfiguration(const std::string& path)
 {
-    cv::FileStorage fs = cv::FileStorage(path, cv::FileStorage::WRITE, "UTF-8");
-    if(fs.isOpened())
-    {
-        //        time_t createTime;
-        //        time(&createTime);
-        //        fs << "calibrationDate" << asctime(localtime(&createTime));
-        fs << "calibrationDate"     << QDateTime::currentDateTime().toString("ddd MMM dd yyyy hh:mm:ss.zzz").toStdString();
-        fs << "cameraMatrix"        << cameraMatrix;
-        fs << "distCoeffs"          << distCoeffs;
-        fs << "ImageHeight"         << imageSize.height;
-        fs << "ImageWidth"          << imageSize.width;
-        fs.release();
-    }
-}
-
-void OutputGenerator::saveConfiguration(const std::string &path)
-{
-    cv::FileStorage out = cv::FileStorage(path, cv::FileStorage::WRITE, "UTF-8");
-    if(out.isOpened())
+    cv::FileStorage out = cv::FileStorage(path, cv::FileStorage::WRITE, StringConstats::textFileCoding);
+    
+    if (out.isOpened())
     {
         /* Write GeneralParameters */
         out << "bEnableDetailetOutput"  << GeneralParameters::bEnableDetailetOutput;
@@ -75,458 +56,470 @@ void OutputGenerator::saveConfiguration(const std::string &path)
         out << "File"           << QtOpencvCore::qstr2str(CameraParameter::File);
         
         /* Write BackgroundSubstraction Parameters */
-        out << "BackgroundSubstractionbUseDefault" << BackgroundSubstraction::bUseDefault;
-        out << "iFromImage" << BackgroundSubstraction::iFromImage;
-        out << "iOffset" << BackgroundSubstraction::iOffset;
-        out << "iToImage" << BackgroundSubstraction::iToImage;
+        out << "BackgroundSubstractionbUseDefault"  << BackgroundSubstraction::bUseDefault;
+        out << "iFromImage"                         << BackgroundSubstraction::iFromImage;
+        out << "iOffset"                            << BackgroundSubstraction::iOffset;
+        out << "iToImage"                           << BackgroundSubstraction::iToImage;
         
         /* Write LarvaeExtractionParameters */
-        out << "LarvaeExtractionParametersbUseDefault" << LarvaeExtractionParameters::bUseDefault;
-        out << "iNumerOfSpinePoints" << LarvaeExtractionParameters::iNumerOfSpinePoints;
+        out << "LarvaeExtractionParametersbUseDefault"  << LarvaeExtractionParameters::bUseDefault;
+        out << "iNumerOfSpinePoints"                    << LarvaeExtractionParameters::iNumerOfSpinePoints;
         
         /* Write IPANContourCurvatureParameters */
-        out << "bUseDynamicIpanParameterCalculation" << LarvaeExtractionParameters::IPANContourCurvatureParameters::bUseDynamicIpanParameterCalculation;
-        out << "dMaximalCurvaturePointsDistance" << LarvaeExtractionParameters::IPANContourCurvatureParameters::dMaximalCurvaturePointsDistance;
-        out << "iCurvatureWindowSize" << LarvaeExtractionParameters::IPANContourCurvatureParameters::iCurvatureWindowSize;
-        out << "iMaximalTriangelSideLenght" << LarvaeExtractionParameters::IPANContourCurvatureParameters::iMaximalTriangelSideLenght;
-        out << "iMinimalTriangelSideLenght" << LarvaeExtractionParameters::IPANContourCurvatureParameters::iMinimalTriangelSideLenght;
+        out << "bUseDynamicIpanParameterCalculation"    << LarvaeExtractionParameters::IPANContourCurvatureParameters::bUseDynamicIpanParameterCalculation;
+        out << "dMaximalCurvaturePointsDistance"        << LarvaeExtractionParameters::IPANContourCurvatureParameters::dMaximalCurvaturePointsDistance;
+        out << "iCurvatureWindowSize"                   << LarvaeExtractionParameters::IPANContourCurvatureParameters::iCurvatureWindowSize;
+        out << "iMaximalTriangelSideLenght"             << LarvaeExtractionParameters::IPANContourCurvatureParameters::iMaximalTriangelSideLenght;
+        out << "iMinimalTriangelSideLenght"             << LarvaeExtractionParameters::IPANContourCurvatureParameters::iMinimalTriangelSideLenght;
         
         /* Write CoiledRecognitionParameters */
-        out << "dMidcirclePerimeterToPerimeterThreshold" << LarvaeExtractionParameters::CoiledRecognitionParameters::dMidcirclePerimeterToPerimeterThreshold;
-        out << "dPerimeterToSpinelenghtThreshold" << LarvaeExtractionParameters::CoiledRecognitionParameters::dPerimeterToSpinelenghtThreshold;
+        out << "dMidcirclePerimeterToPerimeterThreshold"    << LarvaeExtractionParameters::CoiledRecognitionParameters::dMidcirclePerimeterToPerimeterThreshold;
+        out << "dPerimeterToSpinelenghtThreshold"           << LarvaeExtractionParameters::CoiledRecognitionParameters::dPerimeterToSpinelenghtThreshold;
+        out << "dMaxToMeanRadiusRatio"                      << LarvaeExtractionParameters::CoiledRecognitionParameters::dMaxToMeanRadiusThreshold;
         
         /* Write StopAndGoCalculation Parameter */
-        out << "bUseDynamicStopAndGoParameterCalculation" << LarvaeExtractionParameters::StopAndGoCalculation::bUseDynamicStopAndGoParameterCalculation;
-        out << "iAngleThreshold" << LarvaeExtractionParameters::StopAndGoCalculation::iAngleThreshold;
-        out << "iFramesForSpeedCalculation" << LarvaeExtractionParameters::StopAndGoCalculation::iFramesForSpeedCalculation;
-        out << "iSpeedThreshold" << LarvaeExtractionParameters::StopAndGoCalculation::iSpeedThreshold;
+        out << "bUseDynamicStopAndGoParameterCalculation"   << LarvaeExtractionParameters::StopAndGoCalculation::bUseDynamicStopAndGoParameterCalculation;
+        out << "iAngleThreshold"                            << LarvaeExtractionParameters::StopAndGoCalculation::iAngleThreshold;
+        out << "iFramesForSpeedCalculation"                 << LarvaeExtractionParameters::StopAndGoCalculation::iFramesForSpeedCalculation;
+        out << "iSpeedThreshold"                            << LarvaeExtractionParameters::StopAndGoCalculation::iSpeedThreshold;
     }
     
     out.release();
 }
 
-void OutputGenerator::writePoints(std::string const& path, 
+void OutputGenerator::writePoints(std::string const& path,
                                   std::vector<cv::Point> const& points)
 {
-    cv::FileStorage fs = cv::FileStorage(path, cv::FileStorage::WRITE, "UTF-8");
-    if(fs.isOpened())
+    cv::FileStorage fs = cv::FileStorage(path, cv::FileStorage::WRITE, StringConstats::textFileCoding);
+    if (fs.isOpened())
     {
-        //        time_t createTime;
-        //        time(&createTime);
-        //        fs << "CreationDate" << asctime(localtime(&createTime));
         fs << "CreationDate" << QDateTime::currentDateTime().toString("ddd MMM dd yyyy hh:mm:ss.zzz").toStdString();
         fs << "features" << "[";
-        for (std::vector<cv::Point>::const_iterator it = points.begin();  it != points.end(); it++)
+        for (auto const& p : points)
         {
-            fs << (*it);
+            fs << p;
         }
         fs << "]";
-        fs.release();
     }
+    fs.release();
 }
 
-void OutputGenerator::writeLarvaeInverted(std::string const& path, 
-                                          std::vector<Larva> const& larvae, 
-                                          unsigned int movieLength, 
-                                          LandmarkContainer const* landmarkContainer)
+void OutputGenerator::writeCSVFile(std::string const& path,
+                                   std::vector<Larva> const& larvae,
+                                   size_t movieLength,
+                                   LandmarkContainer const* landmarkContainer)
 {
     std::ofstream ofs;
     ofs.open(path.c_str());
     
-    for(unsigned int i = 0; i < larvae.size(); ++i)
+    for (size_t i = 0; i < larvae.size(); ++i)
     {
         ofs << "," << "larva(" << larvae.at(i).getID() << ")";
     }
-    ofs << "\n";
+    ofs << std::endl;
     
     // write momentum_x
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "mom_x(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrMomentum(t,0).c_str();
+            ofs << "," << l.getStrMomentum(t, 0).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write momentum_y
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "mom_y(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrMomentum(t,1).c_str();
+            ofs << "," << l.getStrMomentum(t, 1).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write distance momentum
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "mom_dst(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrMomentumDist(t).c_str();
+            ofs << "," << l.getStrMomentumDist(t).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write accumulated distance momentum
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "acc_dst(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrAccDist(t).c_str();
+            ofs << "," << l.getStrAccDist(t).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write distance to origin (momentum)
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "dst_to_origin(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrDistToOrigin(t).c_str();
+            ofs << "," << l.getStrDistToOrigin(t).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write area
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "area(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrArea(t).c_str();
+            ofs << "," << l.getStrArea(t).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write perimeter
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "perimeter(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrPerimeter(t).c_str();
+            ofs << "," << l.getStrPerimeter(t).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write spine length
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "spine_length(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrSpineLength(t).c_str();
+            ofs << "," << l.getStrSpineLength(t).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write body bending
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "bending(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrMainBodyBendingAngle(t).c_str();
+            ofs << "," << l.getStrMainBodyBendingAngle(t).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write head x position
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "head_x(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrSpine(t,0,0).c_str();
+            ofs << "," << l.getStrSpine(t, 0, 0).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write head y position
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "head_y(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrSpine(t,0,1).c_str();
+            ofs << "," << l.getStrSpine(t, 0, 1).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write spinepoints
-    unsigned int midPos = (int) (((larvae.at(0)).getNSpinePoints()-1)/2);
+    unsigned int midPos = (int)(((larvae.at(0)).getNSpinePoints() - 1) / 2);
     
-    for(int i = 1; i < larvae.at(0).getNSpinePoints() - 1; ++i)
+    for (uint i = 1; i < larvae.at(0).getNSpinePoints() - 1; ++i)
     {
         // write x position of spinepoint i
-        for (unsigned int t = 0; t< movieLength; ++t)
+        for (size_t t = 0; t < movieLength; ++t)
         {
             ofs << "spinepoint_" << i << "_x(" << t << ")";
             
-            for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+            for (auto const& l : larvae)
             {
-                ofs << "," << larvaIt->getStrSpine(t,i,0).c_str();
+                ofs << "," << l.getStrSpine(t, i, 0).c_str();
             }
             
-            ofs << "\n";
+            ofs << std::endl;
         }
         
         // write y position of spinepoint i
-        for (unsigned int t = 0; t< movieLength; ++t)
+        for (size_t t = 0; t < movieLength; ++t)
         {
             ofs << "spinepoint_" << i << "_y(" << t << ")";
             
-            for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+            for (auto const& l : larvae)
             {
-                ofs << "," << larvaIt->getStrSpine(t,i,1).c_str();
+                ofs << "," << l.getStrSpine(t, i, 1).c_str();
             }
             
-            ofs << "\n";
+            ofs << std::endl;
         }
     }
     
     // write tail x position
     unsigned int tailPos = larvae.at(0).getNSpinePoints() - 1;
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "tail_x(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrSpine(t,tailPos,0).c_str();
+            ofs << "," << l.getStrSpine(t, tailPos, 0).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write tail y position
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "tail_y(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrSpine(t,tailPos,1).c_str();
+            ofs << "," << l.getStrSpine(t, tailPos, 1).c_str();
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write spinepoint radii
-    for(int i = 1; i < larvae.at(0).getNSpinePoints()-1; ++i)
+    for (uint i = 1; i < larvae.at(0).getNSpinePoints() - 1; ++i)
     {
-        for (unsigned int t = 0; t< movieLength; ++t)
+        for (size_t t = 0; t < movieLength; ++t)
         {
             ofs << "radius_" << i << "(" << t << ")";
             
-            for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+            for (auto const& l : larvae)
             {
-                ofs << "," << larvaIt->getStrSpineRadius(t,i).c_str();
+                ofs << "," << l.getStrSpineRadius(t, i).c_str();
             }
             
-            ofs << "\n";
+            ofs << std::endl;
         }
     }
     
     // write is coiled indicator
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "is_coiled(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrIsCoiledIndicator(t);
+            ofs << "," << l.getStrIsCoiledIndicator(t);
         }
         
-        ofs << "\n";
+        ofs << std::endl;
+    }
+    
+    // write is well oriented indicator
+    for (size_t t = 0; t < movieLength; ++t)
+    {
+        ofs << "is_well_oriented(" << t << ")";
+        
+        for (auto const& l : larvae)
+        {
+            ofs << "," << l.getStrIsWellOriented(t);
+        }
+        
+        ofs << std::endl;
     }
     
     // write go phase indicator
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "go_phase(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrGoPhaseIndicator(t);
+            ofs << "," << l.getStrGoPhaseIndicator(t);
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write left bended indicator
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "left_bended(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrLeftBendingIndicator(t);
+            ofs << "," << l.getStrLeftBendingIndicator(t);
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write right bended indicator
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "right_bended(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrRightBendingIndicator(t);
+            ofs << "," << l.getStrRightBendingIndicator(t);
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write movement direction
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "mov_direction(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrMovementDirection(t);
+            ofs << "," << l.getStrMovementDirection(t);
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
-    // write velosity
-    for (unsigned int t = 0; t< movieLength; ++t)
+    // write velocity
+    for (size_t t = 0; t < movieLength; ++t)
     {
-        ofs << "velosity(" << t << ")";
+        ofs << "velocity(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrVelosity(t);
+            ofs << "," << l.getStrVelosity(t);
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write acceleration
-    for (unsigned int t = 0; t< movieLength; ++t)
+    for (size_t t = 0; t < movieLength; ++t)
     {
         ofs << "acceleration(" << t << ")";
         
-        for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+        for (auto const& l : larvae)
         {
-            ofs << "," << larvaIt->getStrAcceleration(t);
+            ofs << "," << l.getStrAcceleration(t);
         }
         
-        ofs << "\n";
+        ofs << std::endl;
     }
     
     // write distances to landmarks
-    if(landmarkContainer != NULL)
+    if (landmarkContainer != nullptr)
     {
         // get number of landmarks
         int numberOfLandmarks = landmarkContainer->getSize();
-        for(int i = 0; i < numberOfLandmarks; ++i)
+        for (int i = 0; i < numberOfLandmarks; ++i)
         {
             // get name of landmark i
             std::string landmarkName = landmarkContainer->getLandmarkName(i).toStdString();
             
             // write distance to landmark i
-            for (unsigned int t = 0; t< movieLength; ++t)
+            for (unsigned int t = 0; t < movieLength; ++t)
             {
                 ofs << "dist_to_" << landmarkName << "(" << t << ")";
                 
-                for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+                for (auto const& l : larvae)
                 {
-                    ofs << "," << larvaIt->getStrDistanceToLandmark(t, landmarkName);
+                    ofs << "," << l.getStrDistanceToLandmark(t, landmarkName);
                 }
                 
-                ofs << "\n";
+                ofs << std::endl;
             }
         }
         
         // write indicator if larva is in landmark
-        for(int i = 0; i < numberOfLandmarks; ++i)
+        for (int i = 0; i < numberOfLandmarks; ++i)
         {
             // get name of landmark i
             std::string landmarkName = landmarkContainer->getLandmarkName(i).toStdString();
             
             // write is in landmark i
-            for (unsigned int t = 0; t< movieLength; ++t)
+            for (unsigned int t = 0; t < movieLength; ++t)
             {
                 ofs << "is_in_" << landmarkName << "(" << t << ")";
                 
-                for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
+                for (auto const& l : larvae)
                 {
-                    ofs << "," << larvaIt->getStrIsInLandmark(t, landmarkName);
+                    ofs << "," << l.getStrIsInLandmark(t, landmarkName);
                 }
                 
-                ofs << "\n";
+                ofs << std::endl;
             }
+        }
+        
+        // write bearing angle to landmark
+        for (int i = 0; i < numberOfLandmarks; ++i)
+        {
+            // get name of landmark i
+            std::string landmarkName = landmarkContainer->getLandmarkName(i).toStdString();
             
-            // write bearing angle to landmark
-            for(int i = 0; i < numberOfLandmarks; ++i)
+            // write bearing angle to landmark i
+            for (unsigned int t = 0; t < movieLength; ++t)
             {
-                // get name of landmark i
-                std::string landmarkName = landmarkContainer->getLandmarkName(i).toStdString();
+                ofs << "bearing_angle_to_" << landmarkName << "(" << t << ")";
                 
-                // write bearing angle to landmark i
-                for (unsigned int t = 0; t< movieLength; ++t)
+                for (auto const& l : larvae)
                 {
-                    ofs << "bearing_angle_to_" << landmarkName << "(" << t << ")";
-                    
-                    for (vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
-                    {
-                        ofs << "," << larvaIt->getStrBearingAngleToLandmark(t, landmarkName);
-                    }
-                    
-                    ofs << "\n";
+                    ofs << "," << l.getStrBearingAngleToLandmark(t, landmarkName);
                 }
+                
+                ofs << std::endl;
             }
         }
     }
     
+    ofs.flush();
     ofs.close();
     
 }
 
-void OutputGenerator::writeOutputLarva(const std::string &path, 
-                                       const std::vector<Larva> &larvae, 
-                                       const std::vector<std::string> &imgPaths,  
-                                       const bool useUndist,
-                                       const RegionOfInterestContainer *RIOContainer,
-                                       const LandmarkContainer *landmarkContainer)
+void OutputGenerator::writeYMLFile(const std::string& path,
+                                   const std::vector<Larva>& larvae,
+                                   const std::vector<std::string>& imgPaths,
+                                   const bool useUndist,
+                                   const RegionOfInterestContainer* RIOContainer,
+                                   const LandmarkContainer* landmarkContainer)
 {
     cv::FileStorage fs =  cv::FileStorage(path, cv::FileStorage::WRITE, "UTF-8");
     
-    if(fs.isOpened())
+    if (fs.isOpened())
     {
         fs << "storageDate" << QDateTime::currentDateTime().toString("ddd MMM dd yyyy hh:mm:ss.zzz").toStdString();
         
@@ -536,29 +529,35 @@ void OutputGenerator::writeOutputLarva(const std::string &path,
         
         fs << "data" << "[";
         
-        for (std::vector<Larva>::const_iterator it = larvae.begin(); it != larvae.end(); ++it)
+        for (auto const& l : larvae)
         {
-            fs << *it;
+            fs << l;
         }
         
         fs << "]";
         
-        if (RIOContainer != NULL)
+        if (RIOContainer != nullptr)
+        {
             fs << "ROIContainer" << RIOContainer;
+        }
         
-        if(landmarkContainer != NULL)
+        if (landmarkContainer != nullptr)
+        {
             fs << "LandmarkContainer" << landmarkContainer;
+        }
     }
     fs.release();
 }
 
-void OutputGenerator::drawTrackingResults(const std::string &trackImgPath, 
-                                          const std::vector<std::string> &imgPaths, 
-                                          const std::vector<Larva> &larvae)
+void OutputGenerator::drawTrackingResults(const std::string& trackImgPath,
+                                          const std::vector<std::string>& imgPaths,
+                                          const std::vector<Larva>& larvae)
 {
-    cv::Mat tmpImg = cv::imread(imgPaths.at(0),0);
+    cv::Mat tmpImg = cv::imread(imgPaths.at(0), 0);
     // initialize resultant track image
     cv::Mat resultantTrackImage = cv::Mat::zeros(tmpImg.size(), CV_8UC3);
+    
+    qsrand(QTime::currentTime().msec());
     
     for (std::vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
     {
@@ -567,66 +566,63 @@ void OutputGenerator::drawTrackingResults(const std::string &trackImgPath,
         std::vector<cv::Point> tailPoints = larvaIt->getAllTailPoints();
         
         // calculate random color
-        qsrand(QTime::currentTime().msec());
         int b = qrand() % 256;
         int g = qrand() % 256;
         int r = qrand() % 256;
-        cv::Scalar color(b,g,r);
+        cv::Scalar color(b, g, r);
         
         std::stringstream ss;
         ss << larvaIt->getID();
-        cv::putText(resultantTrackImage,ss.str(),midPoints.at(0),CV_FONT_HERSHEY_PLAIN,2,color,1);
-        
-        //        for (unsigned int index = 1; index < midPoints.size(); ++index)
-        //        {
-        //            cv::line(resultantTrackImage,midPoints.at(index-1), midPoints.at(index),color,2);
-        //        }
+        cv::putText(resultantTrackImage, ss.str(), midPoints.at(0), CV_FONT_HERSHEY_PLAIN, 2, color, 1);
         
         for (unsigned int index = 0; index < midPoints.size(); ++index)
         {
-            cv::line(resultantTrackImage,headPoints.at(index),midPoints.at(index),color,2);
-            cv::line(resultantTrackImage,midPoints.at(index),tailPoints.at(index),color,2);
+            cv::line(resultantTrackImage, headPoints.at(index), midPoints.at(index), color, 2);
+            cv::line(resultantTrackImage, midPoints.at(index), tailPoints.at(index), color, 2);
         }
     }
     
-    cv::imwrite(trackImgPath,resultantTrackImage);
+    cv::imwrite(trackImgPath, resultantTrackImage);
 }
 
-void OutputGenerator::drawTrackingResultsNoNumbers(const std::string &trackImgPath,
-                                                   const std::vector<std::string> &imgPaths,
-                                                   const std::vector<Larva> &larvae)
+void OutputGenerator::drawTrackingResultsNoNumbers(const std::string& trackImgPath,
+                                                   const std::vector<std::string>& imgPaths,
+                                                   const std::vector<Larva>& larvae)
 {
-    cv::Mat tmpImg = cv::imread(imgPaths.at(0),0);
+    cv::Mat tmpImg = cv::imread(imgPaths.at(0), 0);
+    
     // initialize resultant track image
     cv::Mat resultantTrackImage = cv::Mat::zeros(tmpImg.size(), CV_8UC3);
     
+    qsrand(QTime::currentTime().msec());
+    
     for (std::vector<Larva>::const_iterator larvaIt = larvae.begin(); larvaIt != larvae.end(); ++larvaIt)
     {
-        std::vector<cv::Point> midPoints = larvaIt->getAllMidPoints();
-        std::vector<cv::Point> headPoints = larvaIt->getAllHeadPoints();
-        std::vector<cv::Point> tailPoints = larvaIt->getAllTailPoints();
+        std::vector<cv::Point> midPoints    = larvaIt->getAllMidPoints();
+        std::vector<cv::Point> headPoints   = larvaIt->getAllHeadPoints();
+        std::vector<cv::Point> tailPoints   = larvaIt->getAllTailPoints();
         
         // calculate random color
-        qsrand(QTime::currentTime().msec());
         int b = qrand() % 256;
         int g = qrand() % 256;
         int r = qrand() % 256;
-        cv::Scalar color(b,g,r);
+        cv::Scalar color(b, g, r);
         
         for (unsigned int index = 0; index < midPoints.size(); ++index)
         {
-            cv::line(resultantTrackImage,headPoints.at(index),midPoints.at(index),color,2);
-            cv::line(resultantTrackImage,midPoints.at(index),tailPoints.at(index),color,2);
+            cv::line(resultantTrackImage, headPoints.at(index), midPoints.at(index), color, 2);
+            cv::line(resultantTrackImage, midPoints.at(index), tailPoints.at(index), color, 2);
         }
     }
     
-    cv::imwrite(trackImgPath,resultantTrackImage);
+    cv::imwrite(trackImgPath, resultantTrackImage);
+    tmpImg.release();
+    resultantTrackImage.release();
 }
 
-void OutputGenerator::saveResultImage(const QString &path, const QImage &img)
+void OutputGenerator::saveResultImage(const QString& path, const QImage& img)
 {
     cv::imwrite(QtOpencvCore::qstr2str(path), QtOpencvCore::qimg2img(img));
-//    qDebug() <<"write?: "<<  img.save(path);
 }
 
 bool OutputGenerator::getTimeIntervall(std::vector<Larva> const& larvae, std::pair<int, int>& timeInterval)
@@ -637,7 +633,7 @@ bool OutputGenerator::getTimeIntervall(std::vector<Larva> const& larvae, std::pa
     
     std::vector<uint> timeSteps;
     
-    for(size_t i = 0; i < larvae.size(); ++i)
+    for (size_t i = 0; i < larvae.size(); ++i)
     {
         timeSteps           = larvae.at(i).getAllTimeSteps();
         timeInterval.first  = std::min(timeInterval.first, static_cast<int>(timeSteps.front()));
@@ -648,10 +644,10 @@ bool OutputGenerator::getTimeIntervall(std::vector<Larva> const& larvae, std::pa
     return foundSomething;
 }
 
-uint OutputGenerator::getMinimumNumberOfSpinePoints(const std::vector<Larva> &larvae)
+uint OutputGenerator::getMinimumNumberOfSpinePoints(const std::vector<Larva>& larvae)
 {
     uint minNumber = std::numeric_limits<uint>::max();
-    for(size_t i = 0; i < larvae.size(); ++i)
+    for (size_t i = 0; i < larvae.size(); ++i)
     {
         minNumber = std::min(minNumber, larvae.at(i).getNSpinePoints());
     }

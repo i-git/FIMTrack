@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,12 +34,9 @@
 #ifndef PREFERENCESDIALOGWINDOW_HPP
 #define PREFERENCESDIALOGWINDOW_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QDialog>
 #include <QFileDialog>
 #include <QMessageBox>
-#pragma clang diagnostic pop
 
 #include "Configuration/FIMTrack.hpp"
 #include "Control/Logger.hpp"
@@ -87,6 +84,8 @@ private slots:
     void on_doubleSpinBoxBodyBendingAngleThreshold_editingFinished();
 
     void on_checkBoxLarvaeExtactionParametersUseDynamicMovementDirection_clicked(bool checked);
+
+    void on_comboBoxTrackingAssignmentMethod_currentIndexChanged(int index);
 
 private:
     Ui::PreferencesDialogWindow *ui;

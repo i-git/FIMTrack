@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -44,34 +44,32 @@ class Backgroundsubtractor : public QObject
 {
 
     Q_OBJECT
-    
+
 signals:
     void sendLogMessage(QString msg, LOGLEVEL);
-    
-private:
-    
-    /* Variablen */
-    cv::Mat backgroundImage;
-    int iStepSize;
 
-    /* Methoden */
-    cv::Mat& readImage(std::string const& path, cv::Mat& dst);
-    
+private:
+
+    cv::Mat _backgroundImage;
+    int     _stepSize;
+
+    void readImage(std::string const& path, cv::Mat& dst);
+
     void updateBackgroundImage(cv::Mat const& grayImage);
 
-    void generateBackgroundImage(std::vector<std::string> const & imagePaths, Undistorter const & undist);
+    void generateBackgroundImage(std::vector<std::string> const& imagePaths, Undistorter const& undist);
 
-    void generateBackgroundImage(std::vector<std::string> const & imagePaths, unsigned int iFrom, unsigned int iOffset, unsigned int iTo, Undistorter const & undist);
+    void generateBackgroundImage(std::vector<std::string> const& imagePaths, unsigned int iFrom, unsigned int iOffset, unsigned int iTo, Undistorter const& undist);
 
 public:
-    Backgroundsubtractor(std::vector<std::string> const& imagePaths, Undistorter const & undist, QObject *parent = 0);
-    
-    cv::Mat& substract(cv::Mat const& src, cv::Mat& dst) const;
+    Backgroundsubtractor(std::vector<std::string> const& imagePaths, Undistorter const& undist, QObject* parent = 0);
+
+    void substract(cv::Mat const& src, cv::Mat& dst) const;
 
 
     // NOTE: this method might do the same like subtract but in a slightly different fashion...
     // TODO: check for redundance and delete if necessary.
-    cv::Mat& subtractViaThresh(cv::Mat const & src, int const gThresh, cv::Mat & dst) const;
+    void subtractViaThresh(cv::Mat const& src, int const gThresh, cv::Mat& dst) const;
 };
 
 #endif // BACKGROUNDSUBTRACTOR_HPP

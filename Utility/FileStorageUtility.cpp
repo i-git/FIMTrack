@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -110,6 +110,7 @@ void operator>>(cv::FileNode const & n, Larva & larva)
         (*vIt)["spineLength"] >> values.spineLength;
         (*vIt)["perimeter"] >> values.perimeter;
         (*vIt)["isCoiled"] >> values.isCoiled;
+        (*vIt)["isWellOriented"] >> values.isWellOriented;
         (*vIt)["distToOrigin"] >> values.distToOrigin;
         (*vIt)["momentumDist"] >> values.momentumDist;
         (*vIt)["accDist"] >> values.accDist;
@@ -120,7 +121,7 @@ void operator>>(cv::FileNode const & n, Larva & larva)
         (*vIt)["distanceToLandmark"] >> values.distanceToLandmark;
         (*vIt)["isInLandmark"] >> values.isInLandmark;
         (*vIt)["bearinAngle"] >> values.bearinAngle;
-        (*vIt)["velosity"] >> values.velosity;
+        (*vIt)["velocity"] >> values.velosity;
         (*vIt)["acceleration"] >> values.acceleration;
         
         parametersMap.insert(std::pair<unsigned int, Larva::ValuesType>(timeStep,values));
@@ -181,6 +182,7 @@ cv::FileStorage& operator<<(cv::FileStorage& fs, Larva const& larva)
         fs << "spineLength" << values.spineLength;
         fs << "perimeter" << values.perimeter;
         fs << "isCoiled" << values.isCoiled;
+        fs << "isWellOriented" << values.isWellOriented;
         fs << "distToOrigin" << values.distToOrigin;
         fs << "momentumDist" << values.momentumDist;
         fs << "accDist" << values.accDist;
@@ -188,7 +190,7 @@ cv::FileStorage& operator<<(cv::FileStorage& fs, Larva const& larva)
         fs << "isLeftBended" << values.isLeftBended;
         fs << "isRightBended" << values.isRightBended;
         fs << "movementDirection" << values.movementDirection;
-        fs << "velosity" << values.velosity;
+        fs << "velocity" << values.velosity;
         fs << "acceleration" << values.acceleration;
         if(!values.distanceToLandmark.empty())
             fs << "distanceToLandmark" << values.distanceToLandmark;

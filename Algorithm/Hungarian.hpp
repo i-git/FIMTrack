@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -45,8 +45,6 @@ namespace Algorithms
         HUNGARIAN_MODE_MAXIMIZE_UTIL
     }MODE;
     
-//    template <class T>
-    
     /**
      * @brief The Hungarian class
      * Implementation of the hungarian algorithm based on http://csclab.murraystate.edu/bob.pilgrim/445/munkres.html
@@ -64,44 +62,43 @@ namespace Algorithms
         static const int                                COLNOTFOUND     = -2;
         static const int                                ROWNOTFOUND     = -3;
         
-        bool                                            mIsInit;
+        bool                                            _isInit;
         
-        double                                          mCost;
+        double                                          _cost;
         
         // The greatest cost in the initial cost matrix.
-        double                                          mMaxCost;
+        double                                          _maxCost;
         
         // The size of the problem
-        int                                             mRows;
-        int                                             mCols;
+        int                                             _rows;
+        int                                             _cols;
         
         // The original cost matrix
-        cv::Mat                                         mCostMatrixOriginal;
+        cv::Mat                                         _costMatrixOriginal;
         
         // The working cost matrix
-        cv::Mat                                         mCostMatrix;
+        cv::Mat                                         _costMatrix;
         
-        std::vector<std::pair<int, int> >               mAssignment;
+        std::vector<std::pair<int, int> >               _assignment;
         
-        std::vector<std::pair<int, int> >               mPath;
+        std::vector<std::pair<int, int> >               _path;
         
         // The marks (star/prime/none) on each element of the cost matrix.
-        cv::Mat                                         mMarks;
+        cv::Mat                                         _marks;
         
         // Which rows and columns are currently covered.
-        std::vector<bool>                               mRowsCovered;
-        std::vector<bool>                               mColsCovered;
+        std::vector<bool>                               _rowsCovered;
+        std::vector<bool>                               _colsCovered;
         
         // The number of stars in each column.
-        std::vector<int>                                mStarsInCol;
+        std::vector<int>                                _starsInCol;
         
         /**
          * @brief init
          * @param inputMatrix
          * @param mode
          */
-        void                                            init(cv::Mat_<double> const& inputMatrix, 
-                                                             MODE mode);
+        void                                            init(cv::Mat_<double> const& inputMatrix, MODE mode);
         
         void                                            padMatrix(double padValue = 0.0);
         

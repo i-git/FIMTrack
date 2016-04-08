@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (c) 2011-2014 The FIMTrack Team as listed in CREDITS.txt        *
+ * Copyright (c) 2011-2016 The FIMTrack Team as listed in CREDITS.txt        *
  * http://fim.uni-muenster.de                                             	 *
  *                                                                           *
  * This file is part of FIMTrack.                                            *
@@ -34,13 +34,10 @@
 #ifndef QTOPENCVCORE_HPP
 #define QTOPENCVCORE_HPP
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-register"
 #include <QImage>
 #include <QString>
 #include <QStringList>
 #include <QSize>
-#pragma clang diagnostic pop
 
 #include <string>
 #include <iterator>
@@ -60,17 +57,7 @@ namespace QtOpencvCore
      * @param  img is a cv::Mat image which will be converted to a QImage
      * @return QImage of the cv::Mat image img of size labelSize
      */
-    QImage img2qimg(cv::Mat &img);
-    
-    /**
-     * @brief This function takes a cv::Mat image and converts it to a QImage
-     *
-     *
-     * @param  img is a cv::Mat image which will be converted to a QImage
-     * @return QImage of the cv::Mat image img of size labelSize
-     */
-    QImage img2qimgRaw(cv::Mat const& img);
-
+    QImage img2qimg(cv::Mat &img);   
     cv::Mat qimg2img(QImage const &qimg);
     
     /**
@@ -80,16 +67,16 @@ namespace QtOpencvCore
      * @return 
      */
     std::vector<std::string>& qstrList2strList(QStringList const& qStringList, std::vector<std::string>& strList);
-
-
+    
+    
     /**
      * @brief Converts a QString to a std string
      * @param QString to be converted
      * @return  Std string created from the QString
      */
     std::string qstr2str(QString const& qstr);
-
-
+    
+    
     /**
      * @brief Converts a std string to a QString
      * @param Std string to be converted
