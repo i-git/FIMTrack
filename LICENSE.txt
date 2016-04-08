@@ -4,7 +4,7 @@ Developed by: Research Group Research Group Computer Vision and Pattern Recognit
               Institute of Neuro and Behavioural Biology
               Faculty of Biology
               University of Münster, Germany
-              http://cvpr.uni-muenster.de
+              http://www.uni-muenster.de/PRIA/en/index.html
               http://neurobio.uni-muenster.de
 
               http://fim.uni-muenster.de
