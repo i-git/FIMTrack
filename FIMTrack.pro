@@ -21,6 +21,21 @@ include(Main/main.pri)
 include(Calculation/calculation.pri)
 
 CONFIG  += app_bundle
+CONFIG  += release
+
+CONFIG(debug, debug|release) {
+    DESTDIR     = build/debug/bin
+    OBJECTS_DIR = build/debug
+    MOC_DIR     = build/debug
+    RCC_DIR     = build/debug
+    UI_DIR      = build/debug
+} else {
+    DESTDIR     = build/release/bin
+    OBJECTS_DIR = build/release
+    MOC_DIR     = build/release
+    RCC_DIR     = build/release
+    UI_DIR      = build/release
+}
 
 
 macx {
