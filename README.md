@@ -30,7 +30,7 @@ For more informations contact fim[AT]uni-muenster[DOT]de
 
 ## Building FIMTrack
 
-First download [QCustomPlot](http://www.qcustomplot.com/) (1.3.2) and place the header file `qcustomplot.h` and the source files `qcustomplot.cpp` in the `Utility` folder of FIMTrack.
+First download [QCustomPlot](http://www.qcustomplot.com/) (ver. 1.3.2) and place the header file `qcustomplot.h` and the source files `qcustomplot.cpp` in the `Utility` folder of FIMTrack.
 
 ### Linux
 These are instructions for Ubuntu/Debian systems, the packages should be similar on other distributions.
